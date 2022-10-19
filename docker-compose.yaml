@@ -1,0 +1,12 @@
+version: '3.9'
+
+services:
+  casher_db:
+    container_name: casher_db
+    image: postgres:14-alpine
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: dev_root
+      POSTGRES_PASSWORD: dev_root
+      POSTGRES_DB: casher_db
