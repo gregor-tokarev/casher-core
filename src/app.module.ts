@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { HealthModule } from './health/health.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeormConfig } from './config/typeorm.config';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { typeormConfig } from './config/typeorm.config';
       envFilePath: ['.env'],
     }),
     HealthModule,
+    AdminModule,
   ],
   controllers: [AppController],
 })
