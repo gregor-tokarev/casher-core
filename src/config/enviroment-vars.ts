@@ -5,4 +5,7 @@ export interface EnviromentVars {
   DATABASE_PASSWORD: string;
   DATABASE_DB: string;
   DATABASE_SCHEMA: string;
+
+  JWT_ADMIN_ACCESS_SECRET: string;
+  JWT_ADMIN_REFRESH_SECRET: string;
 }

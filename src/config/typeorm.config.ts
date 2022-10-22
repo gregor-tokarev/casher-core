@@ -12,7 +12,7 @@ export function typeormConfig(
     username: configService.get('DATABASE_USER'),
     password: configService.get('DATABASE_PASSWORD'),
     database: configService.get('DATABASE_DB'),
-    entities: [__dirname + '/../**/*.entity.{ts,js}'],
+    entities: [__dirname + '/../../**/*.entity.{js,ts}'],
     logging: true,
   };
 }
