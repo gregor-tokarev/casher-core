@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   HttpCode,
   HttpStatus,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -16,6 +18,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { AdminProductService } from './services/product.service';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { productNotFound } from './errors';
 
 @Controller('admin/product')
 export class ProductController {
@@ -33,7 +36,7 @@ export class ProductController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Permissions(AdminPermissions.CREATE_PRODUCTS)
+  @Permissions(AdminPermissions.UPDATE_PRODUCTS)
   @UseGuards(AuthGuard('jwt-admin-access'))
   @Put('/:productId')
   async updateProduct(
@@ -43,5 +46,20 @@ export class ProductController {
     await this.productService.findById(productId); // checks existence
 
     return this.productService.update(productId, updateProductDto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Permissions(AdminPermissions.DELETE_PRODUCTS)
+  @UseGuards(AuthGuard('jwt-admin-access'))
+  @Delete('/:productId')
+  async deleteProduct(@Param('productId') productId: string): Promise<Product> {
+    const product = await this.productService.findById(productId);
+    if (!product) {
+      throw new NotFoundException(productNotFound);
+    }
+
+    await this.productService.delete(productId);
+
+    return product;
   }
 }

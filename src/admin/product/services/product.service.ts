@@ -66,4 +66,8 @@ export class AdminProductService {
 
     return this.productRepository.findOneBy({ id: productId });
   }
+
+  async delete(productId: string): Promise<void> {
+    await this.productRepository.delete({ id: productId });
+  }
 }
