@@ -1,15 +1,21 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { Repository } from 'typeorm';
-import { AdminUser, AdminPermissions } from '../../entities/admin-user.entity';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { DeleteResult, IsNull, Not, Repository } from 'typeorm';
+import { AdminPermissions, AdminUser } from '../../entities/admin-user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateFirstAdminDto } from '../dto/create-first-admin.dto';
-import { hash } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { EnviromentVars } from '../../../config/enviroment-vars';
 import { TokensDto } from '../dto/tokens.dto';
 import { LoginAdminDto } from '../dto/login-admin.dto';
 import { CreateAdminDto } from '../dto/create-admin.dto';
+import { SetPasswordDto } from '../dto/set-password.dto';
+import { adminNotFound } from '../errors';
 
 @Injectable()
 export class AdminAuthService {
@@ -34,7 +40,30 @@ export class AdminAuthService {
   }
 
   async findById(id: string): Promise<AdminUser> {
-    return this.adminUserRepository.findOneByOrFail({ id });
+    const admin = await this.adminUserRepository.findOneBy({ id });
+    if (!admin) {
+      throw new NotFoundException(adminNotFound);
+    }
+
+    return admin;
+  }
+
+  async removeById(id: string): Promise<DeleteResult> {
+    return this.adminUserRepository.delete({ id });
+  }
+
+  async setPassword(
+    id: string,
+    setPasswordDto: SetPasswordDto,
+  ): Promise<AdminUser> {
+    const admin = await this.adminUserRepository.findOneByOrFail({ id });
+    if (admin.password) {
+      throw new ForbiddenException('Password already set');
+    }
+
+    admin.password = setPasswordDto.password;
+
+    return admin.save();
   }
 
   async create(
@@ -44,7 +73,7 @@ export class AdminAuthService {
     const adminUser = new AdminUser();
     adminUser.email = createAdminDto.email;
     if ('password' in createAdminDto)
-      adminUser.password = await hash(createAdminDto.password, 10);
+      adminUser.password = createAdminDto.password;
 
     if ('permissions' in createAdminDto) {
       adminUser.permissions = createAdminDto.permissions;
@@ -68,16 +97,20 @@ export class AdminAuthService {
     const adminUser = await this.create(createAdminDto);
     const tokens = await this.getTokens(adminUser.id, adminUser.email);
 
-    adminUser.hashedRefreshToken = await hash(tokens.refreshToken, 10);
+    adminUser.hashedRefreshToken = tokens.refreshToken;
+    adminUser.lastLoginAt = 'now()';
     await adminUser.save();
 
     return tokens;
   }
 
   async login(loginAdminDto: LoginAdminDto): Promise<TokensDto> {
-    const adminUser = await this.adminUserRepository.findOneByOrFail({
+    const adminUser = await this.adminUserRepository.findOneBy({
       email: loginAdminDto.email,
     });
+    if (!adminUser) {
+      throw new NotFoundException(adminNotFound);
+    }
 
     const isRightPass = adminUser.validatePassword(loginAdminDto.password);
     if (!isRightPass) {
@@ -87,10 +120,24 @@ export class AdminAuthService {
     adminUser.lastLoginAt = 'now()';
 
     const tokens = await this.getTokens(adminUser.id, adminUser.email);
-    adminUser.hashedRefreshToken = await hash(tokens.refreshToken, 10);
+    adminUser.hashedRefreshToken = tokens.refreshToken;
     await adminUser.save();
 
     return tokens;
+  }
+
+  async logout(adminId: string): Promise<AdminUser> {
+    const [admin] = await this.adminUserRepository.findBy({
+      id: adminId,
+      hashedRefreshToken: Not(IsNull()),
+    });
+
+    if (!admin) {
+      throw new NotFoundException(adminNotFound);
+    }
+
+    admin.hashedRefreshToken = null;
+    return admin.save();
   }
 
   private async getTokens(userId: string, email: string): Promise<TokensDto> {
@@ -138,7 +185,7 @@ export class AdminAuthService {
     }
 
     const tokens = await this.getTokens(adminUser.id, adminUser.email);
-    adminUser.hashedRefreshToken = await hash(tokens.refreshToken, 10);
+    adminUser.hashedRefreshToken = tokens.refreshToken;
     await adminUser.save();
 
     return tokens;

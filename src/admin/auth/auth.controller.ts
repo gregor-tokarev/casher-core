@@ -2,9 +2,12 @@ import {
   Body,
   ConflictException,
   Controller,
+  Delete,
   ForbiddenException,
   HttpCode,
   HttpStatus,
+  Param,
+  Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -17,6 +20,8 @@ import { LoginAdminDto } from './dto/login-admin.dto';
 import { AdminPermissions } from '../entities/admin-user.entity';
 import { Permissions } from './decorators/set-permission.decorator';
 import { CreateAdminDto } from './dto/create-admin.dto';
+import { OkDto } from '../dto/ok.dto';
+import { SetPasswordDto } from './dto/set-password.dto';
 
 @Controller('admin/auth')
 export class AuthController {
@@ -42,6 +47,14 @@ export class AuthController {
   }
 
   @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard('jwt-admin-access'))
+  @Post('/logout')
+  async logout(@GetUser('sub') adminId: string): Promise<OkDto> {
+    await this.authService.logout(adminId);
+    return { message: 'ok' };
+  }
+
+  @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard('jwt-admin-refresh'))
   @Post('/refresh')
   async refreshToken(
@@ -58,7 +71,7 @@ export class AuthController {
   async addAdmin(
     @GetUser('sub') adminId: string,
     @Body() createAdminDto: CreateAdminDto,
-  ): Promise<{ message: 'ok' }> {
+  ): Promise<OkDto> {
     const isEmailExist = await this.authService.isEmailExist(
       createAdminDto.email,
     );
@@ -66,7 +79,38 @@ export class AuthController {
       throw new ConflictException('User with this email already exist');
     }
 
-    await this.authService.create(createAdminDto, adminId);
+    const admin = await this.authService.create(createAdminDto, adminId);
+    admin.lastLoginAt = 'now()';
+    await admin.save();
+
+    return { message: 'ok' };
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard('jwt-admin-access'))
+  @Delete('/remove_admin/:admin_id')
+  async removeAdmin(
+    @GetUser('sub') adminId: string,
+    @Param('admin_id') removedAdminId: string,
+  ): Promise<OkDto> {
+    const remover = await this.authService.findById(adminId);
+    const removed = await this.authService.findById(removedAdminId);
+    if (remover.addedBy !== null || removed.addedBy !== remover.id) {
+      throw new ForbiddenException("You can't remove admin");
+    }
+
+    await this.authService.removeById(removed.id);
+
+    return { message: 'ok' };
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Patch('/:admin_id/set_password')
+  async setPassword(
+    @Param('admin_id') adminId: string,
+    @Body() setPasswordDto: SetPasswordDto,
+  ): Promise<OkDto> {
+    await this.authService.setPassword(adminId, setPasswordDto);
 
     return { message: 'ok' };
   }

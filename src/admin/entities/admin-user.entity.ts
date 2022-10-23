@@ -1,12 +1,15 @@
 import {
   BaseEntity,
+  BeforeInsert,
+  BeforeUpdate,
   Column,
   CreateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { UnauthorizedException } from '@nestjs/common';
-import { compare } from 'bcrypt';
+import { compare, hash } from 'bcrypt';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class AdminUser extends BaseEntity {
@@ -17,6 +20,8 @@ export class AdminUser extends BaseEntity {
     unique: true,
   })
   email: string;
+
+  @Exclude()
   @Column({
     nullable: true,
   })
@@ -40,15 +45,38 @@ export class AdminUser extends BaseEntity {
   })
   permissions: AdminPermissions[];
 
+  @Exclude()
   @Column({
     nullable: true,
   })
   hashedRefreshToken: string;
 
   @Column({
+    type: 'uuid',
     nullable: true,
   })
   addedBy: string;
+
+  @BeforeInsert()
+  async beforeInsert() {
+    console.log(this.password, this.hashedRefreshToken);
+    this.password = this.password
+      ? await hash(this.password, 10)
+      : this.password;
+    this.hashedRefreshToken = this.hashedRefreshToken
+      ? await hash(this.hashedRefreshToken, 10)
+      : this.hashedRefreshToken;
+  }
+
+  @BeforeUpdate()
+  async beforeUpdate() {
+    this.password = this.password
+      ? await hash(this.password, 10)
+      : this.password;
+    this.hashedRefreshToken = this.hashedRefreshToken
+      ? await hash(this.hashedRefreshToken, 10)
+      : this.hashedRefreshToken;
+  }
 
   public validatePassword(password): Promise<boolean> {
     return compare(password, this.password);
@@ -56,7 +84,7 @@ export class AdminUser extends BaseEntity {
 
   public validateRefreshToken(refreshToken: string): Promise<boolean> {
     if (!this.hashedRefreshToken) {
-      throw new UnauthorizedException('User is logged out');
+      throw new UnauthorizedException('Unauthorized');
     }
 
     return compare(refreshToken, this.hashedRefreshToken);

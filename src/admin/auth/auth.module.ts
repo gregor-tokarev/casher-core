@@ -15,5 +15,6 @@ import { AdminRefreshTokenStrategy } from './strategies/admin-refresh-token.stra
     AdminAccessTokenStrategy,
     AdminRefreshTokenStrategy,
   ],
+  exports: [TypeOrmModule, AdminAuthService],
 })
-export class AuthModule {}
+export class AdminAuthModule {}
