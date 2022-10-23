@@ -10,7 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateFirstAdminDto } from '../dto/create-first-admin.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { EnviromentVars } from '../../../config/enviroment-vars';
+import { EnvironmentVars } from '../../../config/environment-vars';
 import { TokensDto } from '../dto/tokens.dto';
 import { LoginAdminDto } from '../dto/login-admin.dto';
 import { CreateAdminDto } from '../dto/create-admin.dto';
@@ -23,7 +23,7 @@ export class AdminAuthService {
     @InjectRepository(AdminUser)
     private readonly adminUserRepository: Repository<AdminUser>,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService<EnviromentVars>,
+    private readonly configService: ConfigService<EnvironmentVars>,
   ) {}
 
   async checkEmpty(): Promise<boolean> {

@@ -1,9 +1,9 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
-import { EnviromentVars } from './enviroment-vars';
+import { EnvironmentVars } from './environment-vars';
 
 export function typeormConfig(
-  configService: ConfigService<EnviromentVars>,
+  configService: ConfigService<EnvironmentVars>,
 ): TypeOrmModuleOptions {
   return {
     type: 'postgres',

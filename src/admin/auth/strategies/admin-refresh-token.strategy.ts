@@ -2,7 +2,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Injectable } from '@nestjs/common';
-import { EnviromentVars } from '../../../config/enviroment-vars';
+import { EnvironmentVars } from '../../../config/environment-vars';
 import { JwtPayloadDto } from '../../dto/jwt-payload.dto';
 
 /**
@@ -20,7 +20,7 @@ export class AdminRefreshTokenStrategy extends PassportStrategy(
    *
    * @param configService - to get variables from env file
    */
-  constructor(private configService: ConfigService<EnviromentVars>) {
+  constructor(private configService: ConfigService<EnvironmentVars>) {
     super({
       jwtFromRequest: ExtractJwt.fromBodyField('token'),
       secretOrKey: configService.get('JWT_ADMIN_REFRESH_SECRET'),

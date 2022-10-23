@@ -1,4 +1,4 @@
-export interface EnviromentVars {
+export interface EnvironmentVars {
   DATABASE_HOST: string;
   DATABASE_PORT: number;
   DATABASE_USER: string;
