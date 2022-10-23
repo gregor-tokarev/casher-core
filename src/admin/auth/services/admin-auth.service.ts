@@ -4,7 +4,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { DeleteResult, IsNull, Not, Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import { AdminPermissions, AdminUser } from '../../entities/admin-user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateFirstAdminDto } from '../dto/create-first-admin.dto';
@@ -48,8 +48,8 @@ export class AdminAuthService {
     return admin;
   }
 
-  async removeById(id: string): Promise<DeleteResult> {
-    return this.adminUserRepository.delete({ id });
+  async delete(id: string): Promise<void> {
+    await this.adminUserRepository.delete({ id });
   }
 
   async setPassword(

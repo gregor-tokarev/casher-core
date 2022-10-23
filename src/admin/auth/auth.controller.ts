@@ -99,7 +99,7 @@ export class AuthController {
       throw new ForbiddenException("You can't remove admin");
     }
 
-    await this.authService.removeById(removed.id);
+    await this.authService.delete(removed.id);
 
     return { message: 'ok' };
   }
