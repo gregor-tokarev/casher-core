@@ -13,14 +13,15 @@ services:
     volumes:
       - pg_data
 
-  es01:
+  casher_es01:
     image: elasticsearch:8.4.3
-    container_name: es01
+    container_name: casher_es01
     environment:
       - ELASTIC_PASSWORD=admin
-      - node.name=es01
+      - node.name=casher_es01
       - cluster.name=es-docker-cluster
       - discovery.type=single-node
+      - xpack.security.enabled=false
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
@@ -31,8 +32,25 @@ services:
       - data01:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
+  casher_kibana:
+    container_name: casher_kibana
+    depends_on:
+      - casher_es01
+    image: kibana:8.4.3
+    volumes:
+      - kibana_data:/usr/share/kibana/data
+    ports:
+      - 5601:5601
+    environment:
+      - SERVERNAME=kibana
+      - ELASTICSEARCH_HOSTS=http://casher_es01:9200
+      - ELASTICSEARCH_USERNAME=elastic/kibana
+      - ELASTICSEARCH_PASSWORD=admin
+
+
 
 volumes:
-   pg_data:
-   data01:
-     driver: local
+  pg_data:
+  data01:
+  kibana_data:
+
