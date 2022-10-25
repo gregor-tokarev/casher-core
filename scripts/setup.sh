@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Init envs..."
-cp ../.local.env ../.env
+cp .local.env .env
 
 echo "Upping services..."
 docker-compose up -d
