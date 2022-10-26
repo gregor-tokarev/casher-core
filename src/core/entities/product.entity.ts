@@ -59,3 +59,9 @@ export class Product extends BaseEntity {
   })
   additionalFields: Record<string, any>;
 }
+
+export class ProductSearchItem {
+  id: string;
+  title: string;
+  description: string;
+}

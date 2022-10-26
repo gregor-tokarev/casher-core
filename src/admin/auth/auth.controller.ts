@@ -4,11 +4,15 @@ import {
   Controller,
   Delete,
   ForbiddenException,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
+  ParseIntPipe,
+  ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { AdminAuthService } from './services/auth.service';
@@ -25,6 +29,7 @@ import { SetPasswordDto } from './dto/set-password.dto';
 import { AccessAdminGuard } from './guards/access-admin.guard';
 import { ChangePermissionsDto } from './dto/change-permissions.dto';
 import { AdminManageService } from './services/manage.service';
+import { AllAdminsDto } from './dto/all-admins.dto';
 
 @Controller('admin/auth')
 export class AuthController {
@@ -38,8 +43,8 @@ export class AuthController {
   async addFirstAdmin(
     @Body() createAdminDto: CreateFirstAdminDto,
   ): Promise<TokensDto> {
-    const isNoAdmins = await this.adminManageService.checkEmpty();
-    if (!isNoAdmins) {
+    const count = await this.adminManageService.count();
+    if (count !== 0) {
       throw new ForbiddenException("You can't add new admin");
     }
 
@@ -48,7 +53,7 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('/login')
-  async signingLocal(@Body() body: LoginAdminDto): Promise<TokensDto> {
+  async login(@Body() body: LoginAdminDto): Promise<TokensDto> {
     return this.adminAuthService.login(body);
   }
 
@@ -58,6 +63,19 @@ export class AuthController {
   async logout(@GetUser('sub') adminId: string): Promise<OkDto> {
     await this.adminAuthService.logout(adminId);
     return { message: 'ok' };
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard('jwt-admin-access'))
+  @Get()
+  async getAllAdmins(
+    @Query('top', ParseIntPipe) top?: number,
+    @Query('skip', ParseIntPipe) skip?: number,
+  ): Promise<AllAdminsDto> {
+    const admins = await this.adminManageService.findAll(top, skip);
+    const count = await this.adminManageService.count();
+
+    return { admins: admins.map((adm) => adm.publicView()), count };
   }
 
   @HttpCode(HttpStatus.OK)
@@ -77,7 +95,7 @@ export class AuthController {
   async addAdmin(
     @GetUser('sub') adminId: string,
     @Body() createAdminDto: CreateAdminDto,
-  ): Promise<AdminUser> {
+  ): Promise<Partial<AdminUser>> {
     const isEmailExist = await this.adminManageService.isEmailExist(
       createAdminDto.email,
     );
@@ -89,14 +107,16 @@ export class AuthController {
     admin.lastLoginAt = 'now()';
     await admin.save();
 
-    return admin;
+    return admin.publicView();
   }
 
   @HttpCode(HttpStatus.OK)
   @UseGuards(AccessAdminGuard)
   @UseGuards(AuthGuard('jwt-admin-access'))
   @Delete('/remove_admin/:admin_id')
-  async removeAdmin(@Param('admin_id') removedAdminId: string): Promise<OkDto> {
+  async removeAdmin(
+    @Param('admin_id', ParseUUIDPipe) removedAdminId: string,
+  ): Promise<OkDto> {
     await this.adminManageService.delete(removedAdminId);
 
     return { message: 'ok' };
@@ -105,7 +125,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Patch('/:admin_id/set_password')
   async setPassword(
-    @Param('admin_id') adminId: string,
+    @Param('admin_id', ParseUUIDPipe) adminId: string,
     @Body() setPasswordDto: SetPasswordDto,
   ): Promise<OkDto> {
     await this.adminManageService.setPassword(adminId, setPasswordDto);
@@ -118,7 +138,7 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt-admin-access'))
   @Patch('/:admin_id/change_permissions')
   async changePermissions(
-    @Param('admin_id') adminId: string,
+    @Param('admin_id', ParseUUIDPipe) adminId: string,
     @Body() changePermissionsDto: ChangePermissionsDto,
   ): Promise<OkDto> {
     await this.adminManageService.changePermissions(

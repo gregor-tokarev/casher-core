@@ -1,17 +1,22 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { Product } from '../../../core/entities/product.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { productNotFound } from '../errors';
+import { SearchService } from '../../../search/search.service';
+import { SearchProductsDto } from '../dto/search-products.dto';
 
 @Injectable()
 export class AdminProductService {
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
+    private readonly searchService: SearchService,
   ) {}
+
+  private readonly productsIndex = 'products';
 
   async create(
     addedBy: string,
@@ -40,7 +45,28 @@ export class AdminProductService {
         .set(addedBy),
     ]);
 
+    await this.searchService.addToIndex(this.productsIndex, {
+      id: product.id,
+      title: product.title,
+      description: product.description,
+      ...product.additionalFields,
+    });
+
     return savedProduct;
+  }
+
+  async search(searchProductsDto: SearchProductsDto): Promise<Product[]> {
+    const searchRes = await this.searchService.search(
+      'products',
+      searchProductsDto.q,
+      ['title', 'description'],
+      searchProductsDto.top,
+      searchProductsDto.skip,
+    );
+
+    return await this.productRepository.findBy({
+      id: In(searchRes.map((item) => item.id)),
+    });
   }
 
   async findById(productId: string): Promise<Product> {
@@ -56,18 +82,28 @@ export class AdminProductService {
     productId: string,
     updateProductDto: UpdateProductDto,
   ): Promise<Product> {
-    await this.productRepository.update(
-      { id: productId },
-      {
-        ...updateProductDto,
-        additionalFields: JSON.parse(updateProductDto.additionalFields),
-      },
-    );
+    await Promise.all([
+      this.productRepository.update(
+        { id: productId },
+        {
+          ...updateProductDto,
+          additionalFields: JSON.parse(updateProductDto.additionalFields),
+        },
+      ),
+      this.searchService.updateInIndex(
+        this.productsIndex,
+        productId,
+        updateProductDto,
+      ),
+    ]);
 
     return this.productRepository.findOneBy({ id: productId });
   }
 
   async delete(productId: string): Promise<void> {
-    await this.productRepository.delete({ id: productId });
+    await Promise.all([
+      this.searchService.deleteFromIndex(this.productsIndex, productId),
+      this.productRepository.delete({ id: productId }),
+    ]);
   }
 }

@@ -2,12 +2,14 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
   NotFoundException,
   Param,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -19,10 +21,18 @@ import { AdminProductService } from './services/product.service';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { productNotFound } from './errors';
+import { SearchProductsDto } from './dto/search-products.dto';
 
 @Controller('admin/product')
 export class ProductController {
   constructor(private readonly productService: AdminProductService) {}
+
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard('jwt-admin-access'))
+  @Get()
+  async getProducts(@Query() query: SearchProductsDto): Promise<Product[]> {
+    return this.productService.search(query);
+  }
 
   @HttpCode(HttpStatus.CREATED)
   @Permissions(AdminPermissions.CREATE_PRODUCTS)

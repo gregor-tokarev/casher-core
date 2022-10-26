@@ -19,9 +19,12 @@ export class AdminManageService {
     private readonly adminUserRepository: Repository<AdminUser>,
   ) {}
 
-  async checkEmpty(): Promise<boolean> {
-    const adminCount = await this.adminUserRepository.count();
-    return adminCount === 0;
+  async findAll(top: number, skip: number): Promise<AdminUser[]> {
+    return this.adminUserRepository.find({ take: top, skip });
+  }
+
+  async count(): Promise<number> {
+    return this.adminUserRepository.count();
   }
 
   async isEmailExist(email: string): Promise<boolean> {

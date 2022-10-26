@@ -3,8 +3,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EnvironmentSchema } from './environment-schema';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeormConfig } from './typeorm.config';
-import { ElasticsearchModule } from '@nestjs/elasticsearch';
-import { elasticsearchConfig } from './elasticsearch.config';
 
 @Module({})
 export class AppConfigModule {
@@ -21,19 +19,7 @@ export class AppConfigModule {
         envFilePath: ['.env'],
       }),
     ];
-    const exports: any[] = [ConfigModule, TypeOrmModule];
-
-    if (process.env.ELASTICSEARCH_NODE) {
-      imports.push(
-        ElasticsearchModule.registerAsync({
-          imports: [ConfigModule],
-          inject: [ConfigService],
-          useFactory: elasticsearchConfig,
-        }),
-      );
-
-      exports.push(ElasticsearchModule);
-    }
+    const exports = [ConfigModule, TypeOrmModule];
 
     return {
       module: AppConfigModule,

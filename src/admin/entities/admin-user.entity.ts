@@ -9,7 +9,6 @@ import {
 } from 'typeorm';
 import { UnauthorizedException } from '@nestjs/common';
 import { compare, hash } from 'bcrypt';
-import { Exclude } from 'class-transformer';
 
 @Entity()
 export class AdminUser extends BaseEntity {
@@ -21,7 +20,6 @@ export class AdminUser extends BaseEntity {
   })
   email: string;
 
-  @Exclude()
   @Column({
     nullable: true,
   })
@@ -45,7 +43,6 @@ export class AdminUser extends BaseEntity {
   })
   permissions: AdminPermissions[];
 
-  @Exclude()
   @Column({
     nullable: true,
   })
@@ -88,6 +85,17 @@ export class AdminUser extends BaseEntity {
     }
 
     return compare(refreshToken, this.hashedRefreshToken);
+  }
+
+  public publicView(): Partial<AdminUser> {
+    return {
+      id: this.id,
+      email: this.email,
+      createdAt: this.createdAt,
+      lastLoginAt: this.lastLoginAt,
+      permissions: this.permissions,
+      addedBy: this.addedBy,
+    };
   }
 }
 
