@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: dev_root
       POSTGRES_DB: casher_db
     volumes:
-      - pg_data
+      - pg_data:/var/lib/postgesql/data
 
   casher_es01:
     image: elasticsearch:8.4.3
