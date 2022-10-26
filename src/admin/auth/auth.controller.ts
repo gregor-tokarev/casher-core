@@ -11,7 +11,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { AdminAuthService } from './services/admin-auth.service';
+import { AdminAuthService } from './services/auth.service';
 import { TokensDto } from './dto/tokens.dto';
 import { CreateFirstAdminDto } from './dto/create-first-admin.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -24,35 +24,39 @@ import { OkDto } from '../dto/ok.dto';
 import { SetPasswordDto } from './dto/set-password.dto';
 import { AccessAdminGuard } from './guards/access-admin.guard';
 import { ChangePermissionsDto } from './dto/change-permissions.dto';
+import { AdminManageService } from './services/manage.service';
 
 @Controller('admin/auth')
 export class AuthController {
-  constructor(private readonly authService: AdminAuthService) {}
+  constructor(
+    private readonly adminAuthService: AdminAuthService,
+    private readonly adminManageService: AdminManageService,
+  ) {}
 
   @HttpCode(HttpStatus.CREATED)
   @Post('/add_first')
   async addFirstAdmin(
     @Body() createAdminDto: CreateFirstAdminDto,
   ): Promise<TokensDto> {
-    const isNoAdmins = await this.authService.checkEmpty();
+    const isNoAdmins = await this.adminManageService.checkEmpty();
     if (!isNoAdmins) {
       throw new ForbiddenException("You can't add new admin");
     }
 
-    return this.authService.signup(createAdminDto);
+    return this.adminAuthService.signup(createAdminDto);
   }
 
   @HttpCode(HttpStatus.OK)
   @Post('/login')
   async signingLocal(@Body() body: LoginAdminDto): Promise<TokensDto> {
-    return this.authService.login(body);
+    return this.adminAuthService.login(body);
   }
 
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard('jwt-admin-access'))
   @Post('/logout')
   async logout(@GetUser('sub') adminId: string): Promise<OkDto> {
-    await this.authService.logout(adminId);
+    await this.adminAuthService.logout(adminId);
     return { message: 'ok' };
   }
 
@@ -63,7 +67,7 @@ export class AuthController {
     @GetUser('sub') userId: string,
     @Body('token') refreshToken: string,
   ): Promise<TokensDto> {
-    return this.authService.refreshAuth(userId, refreshToken);
+    return this.adminAuthService.refreshAuth(userId, refreshToken);
   }
 
   @HttpCode(HttpStatus.CREATED)
@@ -74,14 +78,14 @@ export class AuthController {
     @GetUser('sub') adminId: string,
     @Body() createAdminDto: CreateAdminDto,
   ): Promise<AdminUser> {
-    const isEmailExist = await this.authService.isEmailExist(
+    const isEmailExist = await this.adminManageService.isEmailExist(
       createAdminDto.email,
     );
     if (isEmailExist) {
       throw new ConflictException('User with this email already exist');
     }
 
-    const admin = await this.authService.create(createAdminDto, adminId);
+    const admin = await this.adminManageService.create(createAdminDto, adminId);
     admin.lastLoginAt = 'now()';
     await admin.save();
 
@@ -93,7 +97,7 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt-admin-access'))
   @Delete('/remove_admin/:admin_id')
   async removeAdmin(@Param('admin_id') removedAdminId: string): Promise<OkDto> {
-    await this.authService.delete(removedAdminId);
+    await this.adminManageService.delete(removedAdminId);
 
     return { message: 'ok' };
   }
@@ -104,7 +108,7 @@ export class AuthController {
     @Param('admin_id') adminId: string,
     @Body() setPasswordDto: SetPasswordDto,
   ): Promise<OkDto> {
-    await this.authService.setPassword(adminId, setPasswordDto);
+    await this.adminManageService.setPassword(adminId, setPasswordDto);
 
     return { message: 'ok' };
   }
@@ -117,7 +121,10 @@ export class AuthController {
     @Param('admin_id') adminId: string,
     @Body() changePermissionsDto: ChangePermissionsDto,
   ): Promise<OkDto> {
-    await this.authService.changePermissions(adminId, changePermissionsDto);
+    await this.adminManageService.changePermissions(
+      adminId,
+      changePermissionsDto,
+    );
 
     return { message: 'ok' };
   }

@@ -1,11 +1,10 @@
 import {
-  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { IsNull, Not, Repository } from 'typeorm';
-import { AdminPermissions, AdminUser } from '../../entities/admin-user.entity';
+import { AdminUser } from '../../entities/admin-user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateFirstAdminDto } from '../dto/create-first-admin.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -13,89 +12,21 @@ import { ConfigService } from '@nestjs/config';
 import { EnvironmentVars } from '../../../config/environment-vars';
 import { TokensDto } from '../dto/tokens.dto';
 import { LoginAdminDto } from '../dto/login-admin.dto';
-import { CreateAdminDto } from '../dto/create-admin.dto';
-import { SetPasswordDto } from '../dto/set-password.dto';
 import { adminNotFound } from '../errors';
-import { ChangePermissionsDto } from '../dto/change-permissions.dto';
+import { AdminManageService } from './manage.service';
 
 @Injectable()
 export class AdminAuthService {
   constructor(
     @InjectRepository(AdminUser)
     private readonly adminUserRepository: Repository<AdminUser>,
+    private readonly adminManageService: AdminManageService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService<EnvironmentVars>,
   ) {}
 
-  async checkEmpty(): Promise<boolean> {
-    const adminCount = await this.adminUserRepository.count();
-    return adminCount === 0;
-  }
-
-  async isEmailExist(email: string): Promise<boolean> {
-    const adminUser = await this.adminUserRepository.findOneBy({
-      email,
-    });
-
-    return !!adminUser;
-  }
-
-  async findById(id: string): Promise<AdminUser> {
-    const admin = await this.adminUserRepository.findOneBy({ id });
-    if (!admin) {
-      throw new NotFoundException(adminNotFound);
-    }
-
-    return admin;
-  }
-
-  async delete(id: string): Promise<void> {
-    await this.adminUserRepository.delete({ id });
-  }
-
-  async setPassword(
-    id: string,
-    setPasswordDto: SetPasswordDto,
-  ): Promise<AdminUser> {
-    const admin = await this.adminUserRepository.findOneByOrFail({ id });
-    if (admin.password) {
-      throw new ForbiddenException('Password already set');
-    }
-
-    admin.password = setPasswordDto.password;
-
-    return admin.save();
-  }
-
-  async create(
-    createAdminDto: CreateFirstAdminDto | CreateAdminDto,
-    addedBy?: string,
-  ): Promise<AdminUser> {
-    const adminUser = new AdminUser();
-    adminUser.email = createAdminDto.email;
-    if ('password' in createAdminDto)
-      adminUser.password = createAdminDto.password;
-
-    if ('permissions' in createAdminDto) {
-      adminUser.permissions = createAdminDto.permissions;
-    } else {
-      adminUser.permissions = [
-        AdminPermissions.CREATE_PRODUCTS,
-        AdminPermissions.DELETE_PRODUCTS,
-        AdminPermissions.UPDATE_PRODUCTS,
-        AdminPermissions.ADD_ADMIN,
-        AdminPermissions.ADD_PLUGINS,
-        AdminPermissions.AUTH_SETTINGS,
-        AdminPermissions.DB_SETTINGS,
-      ];
-    }
-    adminUser.addedBy = addedBy;
-
-    return adminUser.save();
-  }
-
   async signup(createAdminDto: CreateFirstAdminDto): Promise<TokensDto> {
-    const adminUser = await this.create(createAdminDto);
+    const adminUser = await this.adminManageService.create(createAdminDto);
     const tokens = await this.getTokens(adminUser.id, adminUser.email);
 
     adminUser.hashedRefreshToken = tokens.refreshToken;
@@ -190,15 +121,5 @@ export class AdminAuthService {
     await adminUser.save();
 
     return tokens;
-  }
-
-  async changePermissions(
-    adminId: string,
-    changePermissionsDto: ChangePermissionsDto,
-  ): Promise<AdminUser> {
-    const admin = await this.findById(adminId);
-    admin.permissions = changePermissionsDto.permissions;
-
-    return admin.save();
   }
 }
