@@ -14,5 +14,6 @@ export function typeormConfig(
     database: configService.get('DATABASE_DB'),
     entities: [__dirname + '/../../**/*.entity.{js,ts}'],
     logging: true,
+    ssl: false,
   };
 }
