@@ -17,11 +17,13 @@ import { CreateFirstAdminDto } from './dto/create-first-admin.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from './decorators/get-user.decorator';
 import { LoginAdminDto } from './dto/login-admin.dto';
-import { AdminPermissions } from '../entities/admin-user.entity';
+import { AdminPermissions, AdminUser } from '../entities/admin-user.entity';
 import { Permissions } from './decorators/set-permission.decorator';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { OkDto } from '../dto/ok.dto';
 import { SetPasswordDto } from './dto/set-password.dto';
+import { AccessAdminGuard } from './guards/access-admin.guard';
+import { ChangePermissionsDto } from './dto/change-permissions.dto';
 
 @Controller('admin/auth')
 export class AuthController {
@@ -71,7 +73,7 @@ export class AuthController {
   async addAdmin(
     @GetUser('sub') adminId: string,
     @Body() createAdminDto: CreateAdminDto,
-  ): Promise<OkDto> {
+  ): Promise<AdminUser> {
     const isEmailExist = await this.authService.isEmailExist(
       createAdminDto.email,
     );
@@ -83,23 +85,15 @@ export class AuthController {
     admin.lastLoginAt = 'now()';
     await admin.save();
 
-    return { message: 'ok' };
+    return admin;
   }
 
   @HttpCode(HttpStatus.OK)
+  @UseGuards(AccessAdminGuard)
   @UseGuards(AuthGuard('jwt-admin-access'))
   @Delete('/remove_admin/:admin_id')
-  async removeAdmin(
-    @GetUser('sub') adminId: string,
-    @Param('admin_id') removedAdminId: string,
-  ): Promise<OkDto> {
-    const remover = await this.authService.findById(adminId);
-    const removed = await this.authService.findById(removedAdminId);
-    if (remover.addedBy !== null || removed.addedBy !== remover.id) {
-      throw new ForbiddenException("You can't remove admin");
-    }
-
-    await this.authService.delete(removed.id);
+  async removeAdmin(@Param('admin_id') removedAdminId: string): Promise<OkDto> {
+    await this.authService.delete(removedAdminId);
 
     return { message: 'ok' };
   }
@@ -111,6 +105,19 @@ export class AuthController {
     @Body() setPasswordDto: SetPasswordDto,
   ): Promise<OkDto> {
     await this.authService.setPassword(adminId, setPasswordDto);
+
+    return { message: 'ok' };
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AccessAdminGuard)
+  @UseGuards(AuthGuard('jwt-admin-access'))
+  @Patch('/:admin_id/change_permissions')
+  async changePermissions(
+    @Param('admin_id') adminId: string,
+    @Body() changePermissionsDto: ChangePermissionsDto,
+  ): Promise<OkDto> {
+    await this.authService.changePermissions(adminId, changePermissionsDto);
 
     return { message: 'ok' };
   }

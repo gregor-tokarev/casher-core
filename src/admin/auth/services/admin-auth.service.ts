@@ -16,6 +16,7 @@ import { LoginAdminDto } from '../dto/login-admin.dto';
 import { CreateAdminDto } from '../dto/create-admin.dto';
 import { SetPasswordDto } from '../dto/set-password.dto';
 import { adminNotFound } from '../errors';
+import { ChangePermissionsDto } from '../dto/change-permissions.dto';
 
 @Injectable()
 export class AdminAuthService {
@@ -189,5 +190,15 @@ export class AdminAuthService {
     await adminUser.save();
 
     return tokens;
+  }
+
+  async changePermissions(
+    adminId: string,
+    changePermissionsDto: ChangePermissionsDto,
+  ): Promise<AdminUser> {
+    const admin = await this.findById(adminId);
+    admin.permissions = changePermissionsDto.permissions;
+
+    return admin.save();
   }
 }
