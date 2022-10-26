@@ -1,6 +1,5 @@
 import { DataSource } from 'typeorm';
 
-console.log('../migrations/*.{js,ts}');
 export default new DataSource({
   type: 'postgres',
   host: process.env.DATABASE_HOST,
@@ -11,5 +10,4 @@ export default new DataSource({
   entities: [__dirname + '/../**/*.entity.{ts,js}'],
   migrations: [__dirname + '/../../migrations/*.{js,ts}'],
   logging: true,
-  ssl: false,
 });
