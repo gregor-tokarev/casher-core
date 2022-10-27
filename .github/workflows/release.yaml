@@ -1,9 +1,8 @@
 name: release on docker hub
 
 on:
-  create:
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+  release:
+    types: [published]
 
 jobs:
   deploy-github:
