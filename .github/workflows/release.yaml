@@ -3,6 +3,7 @@ name: release on docker hub
 on:
   push:
     branches: master
+    tags: 'v**'
 
 jobs:
   deploy-github:
