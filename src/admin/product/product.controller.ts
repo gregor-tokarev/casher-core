@@ -22,16 +22,20 @@ import { GetUser } from '../auth/decorators/get-user.decorator';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { productNotFound } from './errors';
 import { SearchProductsDto } from './dto/search-products.dto';
+import { ProductService } from '../../core/services/product.service';
 
 @Controller('admin/product')
 export class ProductController {
-  constructor(private readonly productService: AdminProductService) {}
+  constructor(
+    private readonly adminProductService: AdminProductService,
+    private readonly productService: ProductService,
+  ) {}
 
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard('jwt-admin-access'))
   @Get()
   async getProducts(@Query() query: SearchProductsDto): Promise<Product[]> {
-    return this.productService.search(query);
+    return this.adminProductService.search(query);
   }
 
   @HttpCode(HttpStatus.CREATED)
@@ -42,7 +46,7 @@ export class ProductController {
     @GetUser('sub') adminId: string,
     @Body() createProductDto: CreateProductDto,
   ): Promise<Product> {
-    return this.productService.create(adminId, createProductDto);
+    return this.adminProductService.create(adminId, createProductDto);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -55,7 +59,7 @@ export class ProductController {
   ): Promise<Product> {
     await this.productService.findById(productId); // checks existence
 
-    return this.productService.update(productId, updateProductDto);
+    return this.adminProductService.update(productId, updateProductDto);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -68,7 +72,7 @@ export class ProductController {
       throw new NotFoundException(productNotFound);
     }
 
-    await this.productService.delete(productId);
+    await this.adminProductService.delete(productId);
 
     return product;
   }

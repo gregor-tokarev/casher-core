@@ -13,7 +13,7 @@ import { SetPasswordDto } from '../dto/set-password.dto';
 import { adminNotFound } from '../errors';
 
 @Injectable()
-export class AdminManageService {
+export class AdminAuthManageService {
   constructor(
     @InjectRepository(AdminUser)
     private readonly adminUserRepository: Repository<AdminUser>,

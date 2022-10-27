@@ -1,9 +1,9 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { AdminManageService } from '../services/manage.service';
+import { AdminAuthManageService } from '../services/manage.service';
 
 @Injectable()
 export class AccessAdminGuard implements CanActivate {
-  constructor(private readonly adminManageService: AdminManageService) {}
+  constructor(private readonly adminManageService: AdminAuthManageService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const { user } = context.switchToHttp().getRequest();

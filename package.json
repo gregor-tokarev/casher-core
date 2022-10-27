@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@elastic/elasticsearch": "^8.4.0",
+    "@nestjs/axios": "^0.1.0",
     "@nestjs/common": "^8.0.0",
     "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^8.0.0",
@@ -41,6 +42,7 @@
     "joi": "^17.6.4",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.0",
+    "passport-yandex": "0.0.5",
     "pg": "^8.8.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",

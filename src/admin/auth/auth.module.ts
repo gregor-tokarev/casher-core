@@ -6,17 +6,17 @@ import { AdminUser } from '../entities/admin-user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { AdminAccessTokenStrategy } from './strategies/admin-access-token.strategy';
 import { AdminRefreshTokenStrategy } from './strategies/admin-refresh-token.strategy';
-import { AdminManageService } from './services/manage.service';
+import { AdminAuthManageService } from './services/manage.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([AdminUser]), JwtModule.register({})],
   controllers: [AuthController],
   providers: [
     AdminAuthService,
-    AdminManageService,
+    AdminAuthManageService,
     AdminAccessTokenStrategy,
     AdminRefreshTokenStrategy,
   ],
-  exports: [TypeOrmModule, AdminAuthService, AdminManageService],
+  exports: [TypeOrmModule, AdminAuthService, AdminAuthManageService],
 })
 export class AdminAuthModule {}

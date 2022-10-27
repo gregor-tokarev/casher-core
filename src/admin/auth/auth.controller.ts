@@ -28,14 +28,14 @@ import { OkDto } from '../dto/ok.dto';
 import { SetPasswordDto } from './dto/set-password.dto';
 import { AccessAdminGuard } from './guards/access-admin.guard';
 import { ChangePermissionsDto } from './dto/change-permissions.dto';
-import { AdminManageService } from './services/manage.service';
+import { AdminAuthManageService } from './services/manage.service';
 import { AllAdminsDto } from './dto/all-admins.dto';
 
 @Controller('admin/auth')
 export class AuthController {
   constructor(
     private readonly adminAuthService: AdminAuthService,
-    private readonly adminManageService: AdminManageService,
+    private readonly adminManageService: AdminAuthManageService,
   ) {}
 
   @HttpCode(HttpStatus.CREATED)

@@ -13,14 +13,14 @@ import { EnvironmentVars } from '../../../config/environment-vars';
 import { TokensDto } from '../dto/tokens.dto';
 import { LoginAdminDto } from '../dto/login-admin.dto';
 import { adminNotFound } from '../errors';
-import { AdminManageService } from './manage.service';
+import { AdminAuthManageService } from './manage.service';
 
 @Injectable()
 export class AdminAuthService {
   constructor(
     @InjectRepository(AdminUser)
     private readonly adminUserRepository: Repository<AdminUser>,
-    private readonly adminManageService: AdminManageService,
+    private readonly adminManageService: AdminAuthManageService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService<EnvironmentVars>,
   ) {}

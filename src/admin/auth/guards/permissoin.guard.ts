@@ -2,13 +2,13 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { permissionKey } from '../decorators/set-permission.decorator';
 import { AdminPermissions } from '../../entities/admin-user.entity';
-import { AdminManageService } from '../services/manage.service';
+import { AdminAuthManageService } from '../services/manage.service';
 
 @Injectable()
 export class PermissionGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
-    private readonly adminManageService: AdminManageService,
+    private readonly adminManageService: AdminAuthManageService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
