@@ -1,4 +1,4 @@
-name: alpha release
+name: alpha release on github
 
 on:
   push:
