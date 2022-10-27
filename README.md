@@ -1,2 +1,3 @@
 ## Casher
-Casher is opensource e-commerce engine. Build with javascript
+
+Casher is opensource e-commerce engine, which built with javascript.
