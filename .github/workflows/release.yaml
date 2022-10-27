@@ -5,7 +5,7 @@ on:
     types: [published]
 
 jobs:
-  deploy-github:
+  deploy-hub:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
