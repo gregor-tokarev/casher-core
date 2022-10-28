@@ -10,6 +10,10 @@ export class OauthOptionService {
     private readonly clientOauthOptionRepository: Repository<ClientOauthOption>,
   ) {}
 
+  async getAll(): Promise<ClientOauthOption[]> {
+    return this.clientOauthOptionRepository.find();
+  }
+
   async findBy(
     findOptions: FindOptionsWhere<ClientOauthOption>,
   ): Promise<ClientOauthOption> {

@@ -2,7 +2,6 @@ import {
   BaseEntity,
   Column,
   Entity,
-  JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -17,14 +16,17 @@ export class UserOauth extends BaseEntity {
   provider: 'yandex' | 'rambler' | 'mailru' | 'vk';
 
   @Column()
-  refreshToken: string;
+  token: string;
+
+  @Column()
+  providerId: string;
 
   @Column({
     unique: true,
+    nullable: true,
   })
-  email: string;
+  email?: string;
 
-  @JoinColumn()
   @OneToOne(() => User, (user) => user.id, {
     onDelete: 'CASCADE',
   })

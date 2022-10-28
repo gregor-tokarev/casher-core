@@ -10,7 +10,7 @@ import { CreateFirstAdminDto } from '../dto/create-first-admin.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { EnvironmentVars } from '../../../config/environment-vars';
-import { TokensDto } from '../dto/tokens.dto';
+import { AdminTokensDto } from '../dto/tokens.dto';
 import { LoginAdminDto } from '../dto/login-admin.dto';
 import { adminNotFound } from '../errors';
 import { AdminAuthManageService } from './manage.service';
@@ -25,7 +25,7 @@ export class AdminAuthService {
     private readonly configService: ConfigService<EnvironmentVars>,
   ) {}
 
-  async signup(createAdminDto: CreateFirstAdminDto): Promise<TokensDto> {
+  async signup(createAdminDto: CreateFirstAdminDto): Promise<AdminTokensDto> {
     const adminUser = await this.adminManageService.create(createAdminDto);
     const tokens = await this.getTokens(adminUser.id, adminUser.email);
 
@@ -36,7 +36,7 @@ export class AdminAuthService {
     return tokens;
   }
 
-  async login(loginAdminDto: LoginAdminDto): Promise<TokensDto> {
+  async login(loginAdminDto: LoginAdminDto): Promise<AdminTokensDto> {
     const adminUser = await this.adminUserRepository.findOneBy({
       email: loginAdminDto.email,
     });
@@ -72,7 +72,10 @@ export class AdminAuthService {
     return admin.save();
   }
 
-  private async getTokens(userId: string, email: string): Promise<TokensDto> {
+  private async getTokens(
+    userId: string,
+    email: string,
+  ): Promise<AdminTokensDto> {
     const access = this.jwtService.signAsync(
       { sub: userId, email },
       {
@@ -100,16 +103,14 @@ export class AdminAuthService {
    * Search for user in db
    * validate his token and generate a new pair of tokens
    *
-   * @param userId - id of user that request new tokens
+   * @param adminId - id of user that request new tokens
    * @param refreshToken - current refresh token of this user
    */
   public async refreshAuth(
-    userId: string,
+    adminId: string,
     refreshToken: string,
-  ): Promise<TokensDto> {
-    const adminUser = await this.adminUserRepository.findOneByOrFail({
-      id: userId,
-    });
+  ): Promise<AdminTokensDto> {
+    const adminUser = await this.adminManageService.findById(adminId);
     const compareRes = await adminUser.validateRefreshToken(refreshToken);
 
     if (!compareRes) {

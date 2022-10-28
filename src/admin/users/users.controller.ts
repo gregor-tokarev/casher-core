@@ -10,7 +10,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { ClientOauthOption } from '../../core/entities/oauth-option.entity';
 import { AdminUserService } from './services/user.service';
-import { OkDto } from '../dto/ok.dto';
+import { OkDto } from '../../core/dto/ok.dto';
 import { EnableOauthDto } from './dto/enable-oauth.dto';
 
 @Controller('admin/users')

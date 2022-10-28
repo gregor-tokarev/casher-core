@@ -13,6 +13,6 @@ export function typeormConfig(
     password: configService.get('DATABASE_PASSWORD'),
     database: configService.get('DATABASE_DB'),
     entities: [__dirname + '/../../**/*.entity.{js,ts}'],
-    logging: true,
+    synchronize: true,
   };
 }

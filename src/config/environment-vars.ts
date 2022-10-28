@@ -8,8 +8,12 @@ export interface EnvironmentVars {
 
   JWT_ADMIN_ACCESS_SECRET: string;
   JWT_ADMIN_REFRESH_SECRET: string;
+  JWT_CLIENT_ACCESS_SECRET: string;
+  JWT_CLIENT_REFRESH_SECRET: string;
 
   ELASTICSEARCH_NODE?: string;
   ELASTICSEARCH_USERNAME?: string;
   ELASTICSEARCH_PASSWORD?: string;
+
+  FRONTEND_URL: string;
 }

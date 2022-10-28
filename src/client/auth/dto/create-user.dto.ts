@@ -9,7 +9,8 @@ export class CreateUserDto {
 
   oauth?: {
     provider: UserOauth['provider'];
+    providerId: string;
     email: string;
-    refreshToken: string;
+    token: string;
   };
 }

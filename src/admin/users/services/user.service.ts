@@ -3,24 +3,20 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { ClientOauthOption } from '../../../core/entities/oauth-option.entity';
-import { Repository } from 'typeorm';
 import { EnableOauthDto } from '../dto/enable-oauth.dto';
+import { OauthOptionService } from '../../../core/services/oauth-option.service';
 
 @Injectable()
 export class AdminUserService {
-  constructor(
-    @InjectRepository(ClientOauthOption)
-    private readonly oauthCredentialsRepository: Repository<ClientOauthOption>,
-  ) {}
+  constructor(private readonly oauthOptionService: OauthOptionService) {}
 
   async getAllOauthOptions(): Promise<ClientOauthOption[]> {
-    return this.oauthCredentialsRepository.find();
+    return this.oauthOptionService.getAll();
   }
 
   async findById(id: string): Promise<ClientOauthOption> {
-    const option = await this.oauthCredentialsRepository.findOneBy({ id });
+    const option = await this.oauthOptionService.findBy({ id });
     if (!option) {
       throw new NotFoundException('option not found');
     }
@@ -47,10 +43,6 @@ export class AdminUserService {
     return option.save();
   }
 
-  async restartServer() {
-    process.exit(0);
-  }
-
   async checkCredentials(
     id: string,
     credentials: Record<string, string>,
@@ -59,12 +51,6 @@ export class AdminUserService {
 
     if (option.name === 'vk') {
       this.checkVkCredentials(credentials);
-    } else if (option.name === 'telegram') {
-      this.checkTelegramCredentials(credentials);
-    } else if (option.name === 'mailru') {
-      this.checkMailruCredentials(credentials);
-    } else if (option.name === 'rambler') {
-      this.checkRamblerCredentials(credentials);
     } else if (option.name === 'yandex') {
       this.checkYandexCredentials(credentials);
     }
@@ -79,21 +65,13 @@ export class AdminUserService {
       throw new BadRequestException(
         'You need provide clientSecret in credentials',
       );
+    } else if (!('serviceSecret' in credentials)) {
+      throw new BadRequestException(
+        'You need to provide serviceSecret in credentials',
+      );
     }
 
     return true;
-  }
-
-  private checkTelegramCredentials(credentials: Record<string, string>) {
-    // TODO
-  }
-
-  private checkMailruCredentials(credentials: Record<string, string>) {
-    // TODO
-  }
-
-  private checkRamblerCredentials(credentials: Record<string, string>) {
-    // TODO
   }
 
   private checkYandexCredentials(credentials: Record<string, string>) {

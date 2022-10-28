@@ -16,7 +16,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AdminAuthService } from './services/auth.service';
-import { TokensDto } from './dto/tokens.dto';
+import { AdminTokensDto } from './dto/tokens.dto';
 import { CreateFirstAdminDto } from './dto/create-first-admin.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from './decorators/get-user.decorator';
@@ -24,7 +24,7 @@ import { LoginAdminDto } from './dto/login-admin.dto';
 import { AdminPermissions, AdminUser } from '../entities/admin-user.entity';
 import { Permissions } from './decorators/set-permission.decorator';
 import { CreateAdminDto } from './dto/create-admin.dto';
-import { OkDto } from '../dto/ok.dto';
+import { OkDto } from '../../core/dto/ok.dto';
 import { SetPasswordDto } from './dto/set-password.dto';
 import { AccessAdminGuard } from './guards/access-admin.guard';
 import { ChangePermissionsDto } from './dto/change-permissions.dto';
@@ -42,7 +42,7 @@ export class AuthController {
   @Post('/add_first')
   async addFirstAdmin(
     @Body() createAdminDto: CreateFirstAdminDto,
-  ): Promise<TokensDto> {
+  ): Promise<AdminTokensDto> {
     const count = await this.adminManageService.count();
     if (count !== 0) {
       throw new ForbiddenException("You can't add new admin");
@@ -53,7 +53,7 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('/login')
-  async login(@Body() body: LoginAdminDto): Promise<TokensDto> {
+  async login(@Body() body: LoginAdminDto): Promise<AdminTokensDto> {
     return this.adminAuthService.login(body);
   }
 
@@ -84,7 +84,7 @@ export class AuthController {
   async refreshToken(
     @GetUser('sub') userId: string,
     @Body('token') refreshToken: string,
-  ): Promise<TokensDto> {
+  ): Promise<AdminTokensDto> {
     return this.adminAuthService.refreshAuth(userId, refreshToken);
   }
 

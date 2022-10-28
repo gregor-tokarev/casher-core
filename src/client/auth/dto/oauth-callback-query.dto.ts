@@ -1,6 +1,6 @@
 import { IsNotEmpty } from 'class-validator';
 
-export class YandexCallbackQueryDto {
+export class OauthCallbackQueryDto {
   @IsNotEmpty()
   code: string;
 }

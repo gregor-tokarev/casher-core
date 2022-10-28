@@ -56,7 +56,6 @@ export class AdminUser extends BaseEntity {
 
   @BeforeInsert()
   async beforeInsert() {
-    console.log(this.password, this.hashedRefreshToken);
     this.password = this.password
       ? await hash(this.password, 10)
       : this.password;

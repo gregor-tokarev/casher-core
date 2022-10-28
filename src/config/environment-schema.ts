@@ -12,7 +12,12 @@ export const EnvironmentSchema = Joi.object({
   JWT_ADMIN_ACCESS_SECRET: Joi.string().required(),
   JWT_ADMIN_REFRESH_SECRET: Joi.string().required(),
 
+  JWT_CLIENT_ACCESS_SECRET: Joi.string().required(),
+  JWT_CLIENT_REFRESH_SECRET: Joi.string().required(),
+
   ELASTICSEARCH_NODE: Joi.string(),
   ELASTICSEARCH_USERNAME: Joi.string(),
   ELASTICSEARCH_PASSWORD: Joi.string(),
+
+  FRONTEND_URL: Joi.string().required(),
 });

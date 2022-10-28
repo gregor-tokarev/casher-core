@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Injectable } from '@nestjs/common';
 import { EnvironmentVars } from '../../../config/environment-vars';
-import { JwtPayloadDto } from '../../dto/jwt-payload.dto';
+import { JwtPayloadDto } from '../../../core/dto/jwt-payload.dto';
 
 /**
  * Strategy to extract and validate access token from headers

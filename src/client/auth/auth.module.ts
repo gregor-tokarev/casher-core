@@ -2,14 +2,21 @@ import { Module } from '@nestjs/common';
 import { ClientAuthService } from './services/auth.service';
 import { ClientAuthManageService } from './services/manage.service';
 import { CoreModule } from '../../core/core.module';
-import { ClientAuthController } from './auth.controller';
+import { YandexAuthController } from './yandex-auth.controller';
 import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
+import { VkAuthController } from './vk-auth.controller';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports: [CoreModule, HttpModule, TypeOrmModule.forFeature([User])],
+  imports: [
+    CoreModule,
+    HttpModule,
+    TypeOrmModule.forFeature([User]),
+    JwtModule.register({}),
+  ],
   providers: [ClientAuthService, ClientAuthManageService],
-  controllers: [ClientAuthController],
+  controllers: [YandexAuthController, VkAuthController],
 })
 export class ClientAuthModule {}
