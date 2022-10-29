@@ -1,4 +1,4 @@
-export class JwtPayloadDto {
+export class AdminJwtPayloadDto {
   /**
    * user id
    */

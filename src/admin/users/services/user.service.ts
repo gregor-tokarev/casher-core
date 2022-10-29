@@ -3,19 +3,19 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ClientOauthOption } from '../../../core/entities/oauth-option.entity';
+import { OauthOption } from '@core/entities/oauth-option.entity';
 import { EnableOauthDto } from '../dto/enable-oauth.dto';
-import { OauthOptionService } from '../../../core/services/oauth-option.service';
+import { OauthOptionService } from '@core/services/oauth-option.service';
 
 @Injectable()
 export class AdminUserService {
   constructor(private readonly oauthOptionService: OauthOptionService) {}
 
-  async getAllOauthOptions(): Promise<ClientOauthOption[]> {
+  async getAllOauthOptions(): Promise<OauthOption[]> {
     return this.oauthOptionService.getAll();
   }
 
-  async findById(id: string): Promise<ClientOauthOption> {
+  async findById(id: string): Promise<OauthOption> {
     const option = await this.oauthOptionService.findBy({ id });
     if (!option) {
       throw new NotFoundException('option not found');
@@ -27,7 +27,7 @@ export class AdminUserService {
   async enableOauthOption(
     oauthId: string,
     toggleDto: EnableOauthDto,
-  ): Promise<ClientOauthOption> {
+  ): Promise<OauthOption> {
     const option = await this.findById(oauthId);
     option.enabled = true;
     option.credentials =
@@ -36,7 +36,7 @@ export class AdminUserService {
     return option.save();
   }
 
-  async disableOauthOption(oauthId: string): Promise<ClientOauthOption> {
+  async disableOauthOption(oauthId: string): Promise<OauthOption> {
     const option = await this.findById(oauthId);
     option.enabled = false;
 

@@ -1,25 +1,15 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { IsNull, Not, Repository } from 'typeorm';
-import { AdminUser } from '../../entities/admin-user.entity';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateFirstAdminDto } from '../dto/create-first-admin.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { EnvironmentVars } from '../../../config/environment-vars';
+import { EnvironmentVars } from '@config/environment-vars';
 import { AdminTokensDto } from '../dto/tokens.dto';
 import { LoginAdminDto } from '../dto/login-admin.dto';
-import { adminNotFound } from '../errors';
 import { AdminAuthManageService } from './manage.service';
 
 @Injectable()
 export class AdminAuthService {
   constructor(
-    @InjectRepository(AdminUser)
-    private readonly adminUserRepository: Repository<AdminUser>,
     private readonly adminManageService: AdminAuthManageService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService<EnvironmentVars>,
@@ -37,12 +27,9 @@ export class AdminAuthService {
   }
 
   async login(loginAdminDto: LoginAdminDto): Promise<AdminTokensDto> {
-    const adminUser = await this.adminUserRepository.findOneBy({
+    const adminUser = await this.adminManageService.findByOrFail({
       email: loginAdminDto.email,
     });
-    if (!adminUser) {
-      throw new NotFoundException(adminNotFound);
-    }
 
     const isRightPass = adminUser.validatePassword(loginAdminDto.password);
     if (!isRightPass) {
@@ -56,20 +43,6 @@ export class AdminAuthService {
     await adminUser.save();
 
     return tokens;
-  }
-
-  async logout(adminId: string): Promise<AdminUser> {
-    const [admin] = await this.adminUserRepository.findBy({
-      id: adminId,
-      hashedRefreshToken: Not(IsNull()),
-    });
-
-    if (!admin) {
-      throw new NotFoundException(adminNotFound);
-    }
-
-    admin.hashedRefreshToken = null;
-    return admin.save();
   }
 
   private async getTokens(
@@ -110,7 +83,9 @@ export class AdminAuthService {
     adminId: string,
     refreshToken: string,
   ): Promise<AdminTokensDto> {
-    const adminUser = await this.adminManageService.findById(adminId);
+    const adminUser = await this.adminManageService.findByOrFail({
+      id: adminId,
+    });
     const compareRes = await adminUser.validateRefreshToken(refreshToken);
 
     if (!compareRes) {

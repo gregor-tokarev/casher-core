@@ -19,12 +19,12 @@ import { AdminAuthService } from './services/auth.service';
 import { AdminTokensDto } from './dto/tokens.dto';
 import { CreateFirstAdminDto } from './dto/create-first-admin.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { GetUser } from './decorators/get-user.decorator';
+import { GetAdminUser } from './decorators/get-user.decorator';
 import { LoginAdminDto } from './dto/login-admin.dto';
 import { AdminPermissions, AdminUser } from '../entities/admin-user.entity';
 import { Permissions } from './decorators/set-permission.decorator';
 import { CreateAdminDto } from './dto/create-admin.dto';
-import { OkDto } from '../../core/dto/ok.dto';
+import { OkDto } from '@core/dto/ok.dto';
 import { SetPasswordDto } from './dto/set-password.dto';
 import { AccessAdminGuard } from './guards/access-admin.guard';
 import { ChangePermissionsDto } from './dto/change-permissions.dto';
@@ -60,8 +60,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard('jwt-admin-access'))
   @Post('/logout')
-  async logout(@GetUser('sub') adminId: string): Promise<OkDto> {
-    await this.adminAuthService.logout(adminId);
+  async logout(@GetAdminUser('sub') adminId: string): Promise<OkDto> {
+    await this.adminManageService.clearRefreshToken(adminId);
     return { message: 'ok' };
   }
 
@@ -82,7 +82,7 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt-admin-refresh'))
   @Post('/refresh')
   async refreshToken(
-    @GetUser('sub') userId: string,
+    @GetAdminUser('sub') userId: string,
     @Body('token') refreshToken: string,
   ): Promise<AdminTokensDto> {
     return this.adminAuthService.refreshAuth(userId, refreshToken);
@@ -93,7 +93,7 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt-admin-access'))
   @Post('/add_admin')
   async addAdmin(
-    @GetUser('sub') adminId: string,
+    @GetAdminUser('sub') adminId: string,
     @Body() createAdminDto: CreateAdminDto,
   ): Promise<Partial<AdminUser>> {
     const isEmailExist = await this.adminManageService.isEmailExist(

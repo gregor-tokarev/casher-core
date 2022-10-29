@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ClientAuthService } from './services/auth.service';
-import { ClientAuthManageService } from './services/manage.service';
-import { CoreModule } from '../../core/core.module';
+import { UserManageService } from './services/manage.service';
+import { CoreModule } from '@core/core.module';
 import { YandexAuthController } from './yandex-auth.controller';
 import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -16,7 +16,7 @@ import { JwtModule } from '@nestjs/jwt';
     TypeOrmModule.forFeature([User]),
     JwtModule.register({}),
   ],
-  providers: [ClientAuthService, ClientAuthManageService],
+  providers: [ClientAuthService, UserManageService],
   controllers: [YandexAuthController, VkAuthController],
 })
 export class ClientAuthModule {}

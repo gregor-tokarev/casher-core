@@ -3,14 +3,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, IsNull, Not, Repository } from 'typeorm';
 import { AdminPermissions, AdminUser } from '../../entities/admin-user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChangePermissionsDto } from '../dto/change-permissions.dto';
 import { CreateFirstAdminDto } from '../dto/create-first-admin.dto';
 import { CreateAdminDto } from '../dto/create-admin.dto';
 import { SetPasswordDto } from '../dto/set-password.dto';
-import { adminNotFound } from '../errors';
 
 @Injectable()
 export class AdminAuthManageService {
@@ -35,13 +34,29 @@ export class AdminAuthManageService {
     return !!adminUser;
   }
 
-  async findById(id: string): Promise<AdminUser> {
-    const admin = await this.adminUserRepository.findOneBy({ id });
+  async findByOrFail(
+    findOptions: FindOptionsWhere<AdminUser>,
+  ): Promise<AdminUser> {
+    const admin = await this.adminUserRepository.findOneBy(findOptions);
     if (!admin) {
-      throw new NotFoundException(adminNotFound);
+      throw new NotFoundException('Admin not found');
     }
 
     return admin;
+  }
+
+  async clearRefreshToken(adminId: string): Promise<AdminUser> {
+    const [admin] = await this.adminUserRepository.findBy({
+      id: adminId,
+      hashedRefreshToken: Not(IsNull()),
+    });
+
+    if (!admin) {
+      throw new NotFoundException('Admin not found');
+    }
+
+    admin.hashedRefreshToken = null;
+    return admin.save();
   }
 
   async delete(id: string): Promise<void> {
@@ -93,7 +108,7 @@ export class AdminAuthManageService {
     adminId: string,
     changePermissionsDto: ChangePermissionsDto,
   ): Promise<AdminUser> {
-    const admin = await this.findById(adminId);
+    const admin = await this.findByOrFail({ id: adminId });
     admin.permissions = changePermissionsDto.permissions;
 
     return admin.save();

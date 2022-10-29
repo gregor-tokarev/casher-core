@@ -17,6 +17,6 @@ import { AdminAuthManageService } from './services/manage.service';
     AdminAccessTokenStrategy,
     AdminRefreshTokenStrategy,
   ],
-  exports: [TypeOrmModule, AdminAuthService, AdminAuthManageService],
+  exports: [AdminAuthService, AdminAuthManageService],
 })
 export class AdminAuthModule {}

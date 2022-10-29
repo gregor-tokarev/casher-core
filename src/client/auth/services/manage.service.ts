@@ -6,14 +6,14 @@ import { CreateUserDto } from '../dto/create-user.dto';
 import { UserOauth } from '../../entities/user-oauth.entity';
 
 @Injectable()
-export class ClientAuthManageService {
+export class UserManageService {
   constructor(
     @InjectRepository(User)
-    private readonly clientUserRepository: Repository<User>,
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async findByOrFail(findOptions: FindOptionsWhere<User>): Promise<User> {
-    const user = await this.clientUserRepository.findOneBy(findOptions);
+    const user = await this.userRepository.findOneBy(findOptions);
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -21,7 +21,7 @@ export class ClientAuthManageService {
     return user;
   }
   async findBy(findOptions: FindOptionsWhere<User>): Promise<User> {
-    return this.clientUserRepository.findOneBy(findOptions);
+    return this.userRepository.findOneBy(findOptions);
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -41,6 +41,6 @@ export class ClientAuthManageService {
       user.oauth = oauth;
     }
 
-    return await user.save();
+    return user.save();
   }
 }

@@ -20,7 +20,7 @@ export class PermissionGuard implements CanActivate {
     }
     const { user: jwtPayload } = context.switchToHttp().getRequest();
 
-    const admin = await this.adminManageService.findById(jwtPayload.sub);
+    const admin = await this.adminManageService.findByOrFail(jwtPayload.sub);
 
     return requiredPermissions.some((permission) =>
       admin.permissions.includes(permission),

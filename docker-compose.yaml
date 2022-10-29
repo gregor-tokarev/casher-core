@@ -31,7 +31,7 @@ services:
     volumes:
       - data01:/usr/share/elasticsearch/data
     ports:
-      - 9200:9200
+      - "9200:9200"
   casher_kibana:
     container_name: casher_kibana
     depends_on:
@@ -40,7 +40,7 @@ services:
     volumes:
       - kibana_data:/usr/share/kibana/data
     ports:
-      - 5601:5601
+      - "5601:5601"
     environment:
       - SERVERNAME=kibana
       - ELASTICSEARCH_HOSTS=http://casher_es01:9200

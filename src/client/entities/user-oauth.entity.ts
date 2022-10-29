@@ -13,7 +13,7 @@ export class UserOauth extends BaseEntity {
   id: string;
 
   @Column()
-  provider: 'yandex' | 'rambler' | 'mailru' | 'vk';
+  provider: 'yandex' | 'vk';
 
   @Column()
   token: string;

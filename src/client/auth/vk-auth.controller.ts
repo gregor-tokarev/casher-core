@@ -1,5 +1,5 @@
-import { OauthOptionService } from '../../core/services/oauth-option.service';
-import { ClientAuthManageService } from './services/manage.service';
+import { OauthOptionService } from '@core/services/oauth-option.service';
+import { UserManageService } from './services/manage.service';
 import { HttpService } from '@nestjs/axios';
 import * as qs from 'node:querystring';
 import {
@@ -16,13 +16,13 @@ import { VkOauthTokensDto } from './dto/vk-oauth-tokens.dto';
 import { VkOauthDto } from './dto/vk-oauth.dto';
 import { ClientAuthService } from './services/auth.service';
 import { ConfigService } from '@nestjs/config';
-import { EnvironmentVars } from '../../config/environment-vars';
+import { EnvironmentVars } from '@config/environment-vars';
 
 @Controller('client/auth/vk')
 export class VkAuthController {
   constructor(
     private readonly oauthOptionService: OauthOptionService,
-    private readonly clientAuthManageService: ClientAuthManageService,
+    private readonly clientAuthManageService: UserManageService,
     private readonly clientAuthService: ClientAuthService,
     private readonly httpService: HttpService,
     private readonly configService: ConfigService<EnvironmentVars>,

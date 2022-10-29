@@ -1,13 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
-import { ClientOauthOption } from './entities/oauth-option.entity';
-import { ProductService } from './services/product.service';
+import { OauthOption } from './entities/oauth-option.entity';
 import { OauthOptionService } from './services/oauth-option.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Product, ClientOauthOption])],
-  providers: [ProductService, OauthOptionService],
-  exports: [TypeOrmModule, ProductService, OauthOptionService],
+  imports: [TypeOrmModule.forFeature([Product, OauthOption])],
+  providers: [OauthOptionService],
+  exports: [TypeOrmModule, OauthOptionService],
 })
 export class CoreModule {}

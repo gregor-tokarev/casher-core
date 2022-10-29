@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AdminUserService } from './services/user.service';
 import { AdminUsersController } from './users.controller';
-import { CoreModule } from '../../core/core.module';
+import { CoreModule } from '@core/core.module';
 import { AdminAuthModule } from '../auth/auth.module';
 
 @Module({

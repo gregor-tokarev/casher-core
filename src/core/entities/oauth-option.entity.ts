@@ -1,7 +1,7 @@
 import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-export class ClientOauthOption extends BaseEntity {
+export class OauthOption extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

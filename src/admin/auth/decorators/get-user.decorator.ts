@@ -1,13 +1,13 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { JwtPayloadDto } from '../../../core/dto/jwt-payload.dto';
+import { AdminJwtPayloadDto } from '../dto/jwt-payload.dto';
 
-export const GetUser = createParamDecorator(
+export const GetAdminUser = createParamDecorator(
   (
-    data: keyof JwtPayloadDto | undefined,
+    data: keyof AdminJwtPayloadDto | undefined,
     context: ExecutionContext,
-  ): string | number | JwtPayloadDto => {
+  ): string | number | AdminJwtPayloadDto => {
     const req = context.switchToHttp().getRequest();
-    const user = req.user as JwtPayloadDto;
+    const user = req.user as AdminJwtPayloadDto;
     return data ? user[data] : user;
   },
 );

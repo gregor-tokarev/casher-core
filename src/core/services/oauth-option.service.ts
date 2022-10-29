@@ -1,22 +1,22 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ClientOauthOption } from '../entities/oauth-option.entity';
+import { OauthOption } from '../entities/oauth-option.entity';
 import { FindOptionsWhere, Repository } from 'typeorm';
 
 @Injectable()
 export class OauthOptionService {
   constructor(
-    @InjectRepository(ClientOauthOption)
-    private readonly clientOauthOptionRepository: Repository<ClientOauthOption>,
+    @InjectRepository(OauthOption)
+    private readonly clientOauthOptionRepository: Repository<OauthOption>,
   ) {}
 
-  async getAll(): Promise<ClientOauthOption[]> {
+  async getAll(): Promise<OauthOption[]> {
     return this.clientOauthOptionRepository.find();
   }
 
   async findBy(
-    findOptions: FindOptionsWhere<ClientOauthOption>,
-  ): Promise<ClientOauthOption> {
+    findOptions: FindOptionsWhere<OauthOption>,
+  ): Promise<OauthOption> {
     const option = await this.clientOauthOptionRepository.findOneBy(
       findOptions,
     );

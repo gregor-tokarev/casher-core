@@ -1,12 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EnvironmentVars } from '../../../config/environment-vars';
+import { EnvironmentVars } from '@config/environment-vars';
 import { JwtService } from '@nestjs/jwt';
 import { IsNull, Not, Repository } from 'typeorm';
-import { adminNotFound } from '../../../admin/auth/errors';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../../entities/user.entity';
 import { ClientTokensDto } from '../dto/tokens.dto';
+import { UserManageService } from './manage.service';
 
 @Injectable()
 export class ClientAuthService {
@@ -15,6 +19,7 @@ export class ClientAuthService {
     private readonly userRepository: Repository<User>,
     private readonly configService: ConfigService<EnvironmentVars>,
     private readonly jwtService: JwtService,
+    private readonly userManageService: UserManageService,
   ) {}
 
   async getTokens(userId: string): Promise<ClientTokensDto> {
@@ -48,54 +53,28 @@ export class ClientAuthService {
     });
 
     if (!user) {
-      throw new NotFoundException(adminNotFound);
+      throw new NotFoundException('Admin not found');
     }
 
     user.hashedRefreshToken = null;
     return user.save();
   }
 
-  // private async getTokens(userId: string, email: string): Promise<TokensDto> {
-  //   const access = this.jwtService.signAsync(
-  //     { sub: userId, email },
-  //     {
-  //       expiresIn: 60 * 5, // 5 minutes
-  //       secret: this.configService.get('JWT_ADMIN_ACCESS_SECRET'),
-  //     },
-  //   );
-  //
-  //   const refresh = this.jwtService.signAsync(
-  //     { sub: userId, email },
-  //     {
-  //       expiresIn: 60 * 60 * 24, // 1 day
-  //       secret: this.configService.get('JWT_ADMIN_REFRESH_SECRET'),
-  //     },
-  //   );
-  //
-  //   const [accessToken, refreshToken] = await Promise.all([access, refresh]);
-  //   return {
-  //     accessToken,
-  //     refreshToken,
-  //   };
-  // }
-  //
-  // async refreshAuth(
-  //   userId: string,
-  //   refreshToken: string,
-  // ): Promise<TokensDto> {
-  //   const adminUser = await this.adminUserRepository.findOneByOrFail({
-  //     id: userId,
-  //   });
-  //   const compareRes = await adminUser.validateRefreshToken(refreshToken);
-  //
-  //   if (!compareRes) {
-  //     throw new UnauthorizedException('Refresh token is invalid');
-  //   }
-  //
-  //   const tokens = await this.getTokens(adminUser.id, adminUser.email);
-  //   adminUser.hashedRefreshToken = tokens.refreshToken;
-  //   await adminUser.save();
-  //
-  //   return tokens;
-  // }
+  async refreshAuth(
+    userId: string,
+    refreshToken: string,
+  ): Promise<ClientTokensDto> {
+    const user = await this.userManageService.findByOrFail({ id: userId });
+    const compareRes = await user.validateRefreshToken(refreshToken);
+
+    if (!compareRes) {
+      throw new UnauthorizedException('Refresh token is invalid');
+    }
+
+    const tokens = await this.getTokens(user.id);
+    user.hashedRefreshToken = tokens.refreshToken;
+    await user.save();
+
+    return tokens;
+  }
 }

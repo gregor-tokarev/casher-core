@@ -2,8 +2,8 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Injectable } from '@nestjs/common';
-import { EnvironmentVars } from '../../../config/environment-vars';
-import { JwtPayloadDto } from '../../../core/dto/jwt-payload.dto';
+import { EnvironmentVars } from '@config/environment-vars';
+import { AdminJwtPayloadDto } from '../dto/jwt-payload.dto';
 
 /**
  * Strategy to extract and validate access token from headers
@@ -33,7 +33,7 @@ export class AdminRefreshTokenStrategy extends PassportStrategy(
    *
    * @param payload - extracted token info
    */
-  public validate(payload: JwtPayloadDto) {
+  public validate(payload: AdminJwtPayloadDto) {
     return payload;
   }
 }

@@ -6,7 +6,7 @@ import {
   Length,
   MaxLength,
 } from 'class-validator';
-import { Product } from '../../../core/entities/product.entity';
+import { Product } from '@core/entities/product.entity';
 
 export class UpdateProductDto {
   @MaxLength(1000)

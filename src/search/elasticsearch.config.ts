@@ -1,5 +1,5 @@
 import { ConfigService } from '@nestjs/config';
-import { EnvironmentVars } from '../config/environment-vars';
+import { EnvironmentVars } from '@config/environment-vars';
 import { ClientOptions } from '@elastic/elasticsearch';
 
 export function elasticsearchConfig(

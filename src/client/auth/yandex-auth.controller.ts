@@ -5,23 +5,23 @@ import {
   Query,
   Redirect,
 } from '@nestjs/common';
-import { OauthOptionService } from '../../core/services/oauth-option.service';
+import { OauthOptionService } from '@core/services/oauth-option.service';
 import { HttpService } from '@nestjs/axios';
 import { Buffer } from 'buffer';
 import * as qs from 'node:querystring';
 import { YandexOauthDto } from './dto/yandex-oauth.dto';
 import { OauthCallbackQueryDto } from './dto/oauth-callback-query.dto';
-import { ClientAuthManageService } from './services/manage.service';
+import { UserManageService } from './services/manage.service';
 import { YandexOauthTokensDto } from './dto/yandex-oauth-tokens.dto';
 import { ClientAuthService } from './services/auth.service';
 import { ConfigService } from '@nestjs/config';
-import { EnvironmentVars } from '../../config/environment-vars';
+import { EnvironmentVars } from '@config/environment-vars';
 
 @Controller('client/auth/yandex')
 export class YandexAuthController {
   constructor(
     private readonly oauthOptionService: OauthOptionService,
-    private readonly clientAuthManageService: ClientAuthManageService,
+    private readonly clientAuthManageService: UserManageService,
     private readonly clientAuthService: ClientAuthService,
     private readonly httpService: HttpService,
     private readonly configService: ConfigService<EnvironmentVars>,
