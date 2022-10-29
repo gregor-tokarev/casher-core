@@ -104,6 +104,7 @@ export class VkAuthController {
 
     const tokens = await this.clientAuthService.getTokens(user.id);
     user.hashedRefreshToken = tokens.refreshToken;
+    await user.save();
 
     const frontendUrl = this.configService.get('FRONTEND_URL');
     return {

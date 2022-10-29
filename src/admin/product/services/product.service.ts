@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { Product } from '@core/entities/product.entity';
-import { FindOptionsWhere, In, Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { SearchService } from '../../../search/search.service';
@@ -52,15 +52,6 @@ export class AdminProductService {
     });
 
     return savedProduct;
-  }
-
-  async findByOrFail(findOptions: FindOptionsWhere<Product>): Promise<Product> {
-    const product = this.productRepository.findOneBy(findOptions);
-    if (!product) {
-      throw new NotFoundException('Product not found');
-    }
-
-    return product;
   }
 
   async search(searchProductsDto: SearchProductsDto): Promise<Product[]> {

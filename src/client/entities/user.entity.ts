@@ -58,6 +58,10 @@ export class User extends BaseEntity {
       : this.hashedRefreshToken;
   }
 
+  public publicView(): void {
+    delete this.hashedRefreshToken;
+  }
+
   public validateRefreshToken(refreshToken: string): Promise<boolean> {
     if (!this.hashedRefreshToken) {
       throw new UnauthorizedException('Unauthorized');

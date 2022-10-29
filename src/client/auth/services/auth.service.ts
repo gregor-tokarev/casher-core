@@ -26,7 +26,7 @@ export class ClientAuthService {
     const access = this.jwtService.signAsync(
       { sub: userId },
       {
-        expiresIn: 60 * 5, // 5 minutes
+        expiresIn: 60 * 60, // 1 hour
         secret: this.configService.get('JWT_CLIENT_ACCESS_SECRET'),
       },
     );
@@ -34,7 +34,7 @@ export class ClientAuthService {
     const refresh = this.jwtService.signAsync(
       { sub: userId },
       {
-        expiresIn: 60 * 60 * 24, // 1 day
+        expiresIn: 60 * 60 * 24 * 14, // 2 weeks
         secret: this.configService.get('JWT_CLIENT_REFRESH_SECRET'),
       },
     );

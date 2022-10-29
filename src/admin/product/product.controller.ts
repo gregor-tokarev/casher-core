@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Post,
   Put,
   Query,
@@ -20,11 +21,18 @@ import { AdminProductService } from './services/product.service';
 import { GetAdminUser } from '../auth/decorators/get-user.decorator';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SearchProductsDto } from './dto/search-products.dto';
+import { ProductService } from '@core/services/product.service';
+import { ReviewService } from '@core/services/review.service';
+import { Review } from '@core/entities/review.entity';
 
 @UseGuards(AuthGuard('jwt-admin-access'))
 @Controller('admin/product')
 export class ProductController {
-  constructor(private readonly adminProductService: AdminProductService) {}
+  constructor(
+    private readonly adminProductService: AdminProductService,
+    private readonly productService: ProductService,
+    private readonly reviewService: ReviewService,
+  ) {}
 
   @HttpCode(HttpStatus.OK)
   @Get()
@@ -49,7 +57,7 @@ export class ProductController {
     @Param('productId') productId: string,
     @Body() updateProductDto: UpdateProductDto,
   ): Promise<Product> {
-    await this.adminProductService.findByOrFail({ id: productId }); // checks existence
+    await this.productService.findByOrFail({ id: productId }); // checks existence
 
     return this.adminProductService.update(productId, updateProductDto);
   }
@@ -58,12 +66,20 @@ export class ProductController {
   @Permissions(AdminPermissions.DELETE_PRODUCTS)
   @Delete('/:productId')
   async deleteProduct(@Param('productId') productId: string): Promise<Product> {
-    const product = await this.adminProductService.findByOrFail({
+    const product = await this.productService.findByOrFail({
       id: productId,
     });
 
     await this.adminProductService.delete(productId);
 
     return product;
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get(':product_id/reviews')
+  async getReviews(
+    @Param('product_id', ParseUUIDPipe) productId: string,
+  ): Promise<Review[]> {
+    return this.reviewService.getProductReviews(productId);
   }
 }
