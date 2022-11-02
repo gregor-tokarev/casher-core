@@ -12,5 +12,8 @@ export class File extends BaseEntity {
   path: string;
 
   @Column()
+  mimetype: string;
+
+  @Column()
   etag: string;
 }

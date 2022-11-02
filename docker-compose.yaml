@@ -16,7 +16,7 @@ services:
     container_name: mino
     image: quay.io/minio/minio
     volumes:
-      - ./.data/mino:/data
+      - file_data:/data
     ports:
       - "9000:9000"
       - "9090:9090"

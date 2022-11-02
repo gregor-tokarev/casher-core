@@ -41,20 +41,18 @@ export class FileService implements OnModuleInit {
     path: string,
     file: Express.Multer.File,
   ): Promise<Minio.UploadedObjectInfo> {
-    return new Promise((resolve, reject) => {
-      this.minioClient.putObject(
-        this.configService.get('MINO_APP_BUCKET'),
-        path,
-        file.buffer,
-        (error, etag) => {
-          if (error) {
-            return reject(error);
-          }
+    return this.minioClient.putObject(
+      this.configService.get('MINO_APP_BUCKET'),
+      path,
+      file.buffer,
+    );
+  }
 
-          resolve(etag);
-        },
-      );
-    });
+  private async removeFromBucket(path: string): Promise<void> {
+    await this.minioClient.removeObject(
+      this.configService.get('MINO_APP_BUCKET'),
+      path,
+    );
   }
 
   async addUserFile(addFileDto: AddFileDto): Promise<File> {
@@ -69,8 +67,16 @@ export class FileService implements OnModuleInit {
     file.etag = etag;
     file.originalname = addFileDto.file.originalname;
     file.path = path;
+    file.mimetype = addFileDto.file.mimetype;
 
     return file.save();
+  }
+
+  async removeUserFile(fileId: string): Promise<File> {
+    const fileRow = await this.getFileRow(fileId);
+    await Promise.all([this.removeFromBucket(fileRow.path), fileRow.remove()]);
+
+    return fileRow;
   }
 
   private getExtension(file: Express.Multer.File): string {
