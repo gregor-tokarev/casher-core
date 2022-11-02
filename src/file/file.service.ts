@@ -6,9 +6,9 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EnvironmentVars } from '@config/environment-vars';
-import { MINIO_CLIENT } from '@config/providerts';
 import * as Minio from 'minio';
 import { Readable } from 'stream';
+import { MINIO_CLIENT } from '@config/providers';
 import { AddFileDto } from './dto/add-file.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { File } from './file.entity';

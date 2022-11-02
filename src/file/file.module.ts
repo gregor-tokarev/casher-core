@@ -1,4 +1,4 @@
-import { MINIO_CLIENT } from '@config/providerts';
+import { MINIO_CLIENT } from '@config/providers';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { minoConfig } from '@config/mino.config';
