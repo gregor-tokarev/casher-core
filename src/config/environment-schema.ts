@@ -19,5 +19,11 @@ export const EnvironmentSchema = Joi.object({
   ELASTICSEARCH_USERNAME: Joi.string(),
   ELASTICSEARCH_PASSWORD: Joi.string(),
 
+  MINO_HOST: Joi.string(),
+  MINO_PORT: Joi.number().default(9000),
+  MINO_APP_BUCKET: Joi.string(),
+  MINO_ACCESS_KEY: Joi.string(),
+  MINO_SECRET_KEY: Joi.string(),
+
   FRONTEND_URL: Joi.string().required(),
 });

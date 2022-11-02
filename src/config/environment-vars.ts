@@ -15,5 +15,11 @@ export interface EnvironmentVars {
   ELASTICSEARCH_USERNAME?: string;
   ELASTICSEARCH_PASSWORD?: string;
 
+  MINO_HOST?: string;
+  MINO_PORT?: string;
+  MINO_APP_BUCKET?: string;
+  MINO_ACCESS_KEY?: string;
+  MINO_SECRET_KEY?: string;
+
   FRONTEND_URL: string;
 }
