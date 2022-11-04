@@ -6,6 +6,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { SearchService } from '../../../search/search.service';
 import { SearchProductsDto } from '../dto/search-products.dto';
+import { FileService } from '../../../file/file.service';
+import { ProductService } from '@core/services/product.service';
+import { DeletePhotosDto } from '../dto/delete-photos.dto';
 
 @Injectable()
 export class AdminProductService {
@@ -13,12 +16,15 @@ export class AdminProductService {
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
     private readonly searchService: SearchService,
+    private readonly fileService: FileService,
+    private readonly productService: ProductService,
   ) {}
 
   private readonly productsIndex = 'products';
 
   async create(
     addedBy: string,
+    photos: Express.Multer.File[],
     createProductDto: CreateProductDto,
   ): Promise<Product> {
     const product = new Product();
@@ -27,9 +33,17 @@ export class AdminProductService {
     product.price = createProductDto.price;
     product.priceWithDiscount = createProductDto.priceWithDiscount;
     product.priceCurrency = createProductDto.priceCurrency;
-    product.additionalFields = JSON.parse(createProductDto.additionalFields);
+    product.additionalFields = createProductDto.additionalFields
+      ? JSON.parse(createProductDto.additionalFields)
+      : {};
 
     const savedProduct = await product.save();
+
+    const savedPhotos = await Promise.all(
+      photos.map((photo) =>
+        this.fileService.addAdminFile({ file: photo, userId: addedBy }),
+      ),
+    );
 
     await Promise.all([
       this.productRepository
@@ -42,6 +56,11 @@ export class AdminProductService {
         .relation(Product, 'updatedBy')
         .of(savedProduct)
         .set(addedBy),
+      this.productRepository
+        .createQueryBuilder()
+        .relation(Product, 'photos')
+        .of(savedProduct)
+        .add(savedPhotos),
     ]);
 
     await this.searchService.addToIndex(this.productsIndex, {
@@ -50,6 +69,8 @@ export class AdminProductService {
       description: product.description,
       ...product.additionalFields,
     });
+
+    savedProduct.photos = savedPhotos;
 
     return savedProduct;
   }
@@ -95,5 +116,51 @@ export class AdminProductService {
       this.searchService.deleteFromIndex(this.productsIndex, productId),
       this.productRepository.delete({ id: productId }),
     ]);
+  }
+
+  async deletePhotos(
+    productId: string,
+    deletePhotosDto: DeletePhotosDto,
+  ): Promise<Product> {
+    const product = await this.productService.findByOrFail({ id: productId });
+    const newPhotos = [];
+
+    product.photos.forEach((photo) => {
+      if (!deletePhotosDto.photoIds.includes(photo.id)) {
+        newPhotos.push(photo);
+      }
+    });
+
+    const deletePhotosPromises = deletePhotosDto.photoIds.map((photoId) =>
+      this.fileService.removeFile(photoId),
+    );
+    await Promise.all(deletePhotosPromises);
+
+    product.photos = newPhotos;
+
+    return product.save();
+  }
+
+  async addPhotos(
+    productId: string,
+    addedBy: string,
+    photos: Express.Multer.File[],
+  ): Promise<Product> {
+    const product = await this.productService.findByOrFail({ id: productId });
+    const savedPhotos = await Promise.all(
+      photos.map((photo) =>
+        this.fileService.addAdminFile({ file: photo, userId: addedBy }),
+      ),
+    );
+
+    await this.productRepository
+      .createQueryBuilder()
+      .relation(Product, 'photos')
+      .of(product)
+      .add(savedPhotos);
+
+    product.photos = [...product.photos, ...savedPhotos];
+
+    return product;
   }
 }

@@ -8,9 +8,12 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Put,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ReviewService } from '@core/services/review.service';
 import { Review } from '@core/entities/review.entity';
@@ -21,6 +24,9 @@ import { ClientReviewService } from './review.service';
 import { AccessReviewGuard } from './guards/access-review.guard';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { OkDto } from '@core/dto/ok.dto';
+import { DeletePhotosDto } from './dto/delete-photos.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { fileMimetypeFilter } from '../../file/utils/file-mimetype-filter';
 
 @Controller('client/product')
 export class ReviewController {
@@ -41,12 +47,16 @@ export class ReviewController {
   }
 
   @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(
+    FilesInterceptor('photos', 10, { fileFilter: fileMimetypeFilter('image') }),
+  )
   @UseGuards(AuthGuard('jwt-client-access'))
   @Post('/:product_id/review')
   async createReview(
     @Param('product_id', ParseUUIDPipe) productId: string,
     @GetClientUser('sub') userId: string,
     @Body() createReviewDto: CreateReviewDto,
+    @UploadedFiles() photos: Express.Multer.File[],
   ): Promise<Review> {
     const alreadyReviewed = await this.clientReviewService.isUserReviewProduct(
       userId,
@@ -56,7 +66,12 @@ export class ReviewController {
       throw new ForbiddenException('User already reviewed this product');
     }
 
-    return this.clientReviewService.create(productId, userId, createReviewDto);
+    return this.clientReviewService.create(
+      productId,
+      userId,
+      photos,
+      createReviewDto,
+    );
   }
 
   @HttpCode(HttpStatus.OK)
@@ -70,6 +85,32 @@ export class ReviewController {
     await this.clientReviewService.update(reviewId, updateReviewDto);
 
     return this.reviewService.findByOrFail({ id: reviewId });
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AccessReviewGuard)
+  @UseGuards(AuthGuard('jwt-client-access'))
+  @Patch('/review/:review_id/delete_photos')
+  async deletePhotos(
+    @Param('review_id', ParseUUIDPipe) reviewId: string,
+    @Body() deletePhotosDto: DeletePhotosDto,
+  ): Promise<Review> {
+    return this.clientReviewService.deletePhotos(reviewId, deletePhotosDto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @UseInterceptors(
+    FilesInterceptor('photos', 10, { fileFilter: fileMimetypeFilter('image') }),
+  )
+  @UseGuards(AccessReviewGuard)
+  @UseGuards(AuthGuard('jwt-client-access'))
+  @Patch('/review/:review_id/add_photos')
+  async addPhotos(
+    @GetClientUser('sub') userId: string,
+    @Param('review_id', ParseUUIDPipe) reviewId: string,
+    @UploadedFiles() photos: Express.Multer.File[],
+  ): Promise<Review> {
+    return this.clientReviewService.addPhotos(reviewId, userId, photos);
   }
 
   @HttpCode(HttpStatus.OK)

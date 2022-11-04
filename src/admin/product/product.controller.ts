@@ -7,10 +7,13 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Put,
   Query,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AdminPermissions } from '../entities/admin-user.entity';
@@ -24,6 +27,9 @@ import { SearchProductsDto } from './dto/search-products.dto';
 import { ProductService } from '@core/services/product.service';
 import { ReviewService } from '@core/services/review.service';
 import { Review } from '@core/entities/review.entity';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { fileMimetypeFilter } from '../../file/utils/file-mimetype-filter';
+import { DeletePhotosDto } from './dto/delete-photos.dto';
 
 @UseGuards(AuthGuard('jwt-admin-access'))
 @Controller('admin/product')
@@ -41,25 +47,42 @@ export class ProductController {
   }
 
   @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(
+    FilesInterceptor('photos', 10, {
+      fileFilter: fileMimetypeFilter('image'),
+      limits: { fieldSize: 100 },
+    }),
+  )
   @Permissions(AdminPermissions.CREATE_PRODUCTS)
   @Post()
   async createProduct(
     @GetAdminUser('sub') adminId: string,
     @Body() createProductDto: CreateProductDto,
+    @UploadedFiles() photos: Express.Multer.File[],
   ): Promise<Product> {
-    return this.adminProductService.create(adminId, createProductDto);
+    return this.adminProductService.create(adminId, photos, createProductDto);
   }
 
   @HttpCode(HttpStatus.OK)
   @Permissions(AdminPermissions.UPDATE_PRODUCTS)
   @Put('/:productId')
   async updateProduct(
-    @Param('productId') productId: string,
+    @Param('productId', ParseUUIDPipe) productId: string,
     @Body() updateProductDto: UpdateProductDto,
   ): Promise<Product> {
     await this.productService.findByOrFail({ id: productId }); // checks existence
 
     return this.adminProductService.update(productId, updateProductDto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Permissions(AdminPermissions.UPDATE_PRODUCTS)
+  @Patch('/:productId/delete_photos')
+  async deletePhotos(
+    @Param('productId', ParseUUIDPipe) productId: string,
+    @Body() deletePhotosDto: DeletePhotosDto,
+  ): Promise<Product> {
+    return this.adminProductService.deletePhotos(productId, deletePhotosDto);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -73,6 +96,30 @@ export class ProductController {
     await this.adminProductService.delete(productId);
 
     return product;
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Permissions(AdminPermissions.UPDATE_PRODUCTS)
+  @Patch('/:productId/delete_photos')
+  async deleteProductPhotos(
+    @Body() deletePhotosDto: DeletePhotosDto,
+    @Param('productId', ParseUUIDPipe) productId: string,
+  ): Promise<Product> {
+    return this.adminProductService.deletePhotos(productId, deletePhotosDto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @UseInterceptors(
+    FilesInterceptor('photos', 10, { fileFilter: fileMimetypeFilter('image') }),
+  )
+  @Permissions(AdminPermissions.UPDATE_PRODUCTS)
+  @Patch('/:productId/add_photos')
+  async addProductPhotos(
+    @GetAdminUser('sub') adminId: string,
+    @Param('productId', ParseUUIDPipe) productId: string,
+    @UploadedFiles() photos: Express.Multer.File[],
+  ): Promise<Product> {
+    return this.adminProductService.addPhotos(productId, adminId, photos);
   }
 
   @HttpCode(HttpStatus.OK)

@@ -3,7 +3,6 @@ import {
   IsIn,
   IsJSON,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   Length,
   MaxLength,
@@ -18,11 +17,9 @@ export class CreateProductDto {
   @IsNotEmpty()
   description: string;
 
-  @IsNumber()
   @IsNotEmpty()
   price: number;
 
-  @IsNumber()
   @IsOptional()
   priceWithDiscount?: number;
 

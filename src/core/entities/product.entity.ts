@@ -4,11 +4,14 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { AdminUser } from '../../admin/entities/admin-user.entity';
+import { File } from '../../file/file.entity';
 
 @Entity()
 export class Product extends BaseEntity {
@@ -33,6 +36,10 @@ export class Product extends BaseEntity {
     type: 'text',
   })
   description: string;
+
+  @JoinTable()
+  @ManyToMany(() => File, (file) => file.id)
+  photos: File[];
 
   @JoinColumn()
   @ManyToOne(() => AdminUser, (adminUser) => adminUser.id)

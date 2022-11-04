@@ -11,7 +11,10 @@ export class ProductService {
   ) {}
 
   async findByOrFail(findOptions: FindOptionsWhere<Product>): Promise<Product> {
-    const product = this.productRepository.findOneBy(findOptions);
+    const product = this.productRepository.findOne({
+      where: findOptions,
+      relations: ['photos'],
+    });
     if (!product) {
       throw new NotFoundException('Product not found');
     }

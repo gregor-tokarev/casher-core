@@ -11,7 +11,10 @@ export class ReviewService {
   ) {}
 
   async findByOrFail(findOptions: FindOptionsWhere<Review>): Promise<Review> {
-    const review = await this.reviewRepository.findOneBy(findOptions);
+    const review = await this.reviewRepository.findOne({
+      where: findOptions,
+      relations: ['photos'],
+    });
     if (!review) {
       throw new NotFoundException('Review not found');
     }

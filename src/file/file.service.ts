@@ -55,28 +55,46 @@ export class FileService implements OnModuleInit {
     );
   }
 
-  async addUserFile(addFileDto: AddFileDto): Promise<File> {
+  private async addFile(
+    path: string,
+    fileId: string,
+    file: Express.Multer.File,
+  ): Promise<File> {
+    const { etag } = await this.uploadFile(path, file);
+
+    const fileRow = new File();
+    fileRow.id = fileId;
+    fileRow.etag = etag;
+    fileRow.originalname = file.originalname;
+    fileRow.path = path;
+    fileRow.mimetype = file.mimetype;
+
+    return fileRow.save();
+  }
+
+  async addClientFile(addFileDto: AddFileDto): Promise<File> {
     const fileId = v4();
     const path = `/users/${addFileDto.userId}/${fileId}.${this.getExtension(
       addFileDto.file,
     )}`;
-    const { etag } = await this.uploadFile(path, addFileDto.file);
 
-    const file = new File();
-    file.id = fileId;
-    file.etag = etag;
-    file.originalname = addFileDto.file.originalname;
-    file.path = path;
-    file.mimetype = addFileDto.file.mimetype;
-
-    return file.save();
+    return this.addFile(path, fileId, addFileDto.file);
   }
 
-  async removeUserFile(fileId: string): Promise<File> {
+  async removeFile(fileId: string): Promise<File> {
     const fileRow = await this.getFileRow(fileId);
     await Promise.all([this.removeFromBucket(fileRow.path), fileRow.remove()]);
 
     return fileRow;
+  }
+
+  async addAdminFile(addFileDto: AddFileDto): Promise<File> {
+    const fileId = v4();
+    const path = `/admins/${addFileDto.userId}/${fileId}.${this.getExtension(
+      addFileDto.file,
+    )}`;
+
+    return this.addFile(path, fileId, addFileDto.file);
   }
 
   private getExtension(file: Express.Multer.File): string {
