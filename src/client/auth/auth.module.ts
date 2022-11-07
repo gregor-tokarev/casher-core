@@ -11,11 +11,13 @@ import { JwtModule } from '@nestjs/jwt';
 import { ClientRefreshTokenStrategy } from './strategies/client-refresh-token.strategy';
 import { ClientAccessTokenStrategy } from './strategies/client-access-token.strategy';
 import { ClientAuthController } from './auth.controller';
+import { CartModule } from '../cart/cart.module';
 
 @Module({
   imports: [
     CoreModule,
     HttpModule,
+    CartModule,
     TypeOrmModule.forFeature([User]),
     JwtModule.register({}),
   ],

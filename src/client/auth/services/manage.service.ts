@@ -4,12 +4,14 @@ import { User } from '../../entities/user.entity';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UserOauth } from '../../entities/user-oauth.entity';
+import { ClientCartService } from '../../cart/services/cart.service';
 
 @Injectable()
 export class UserManageService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly clientCartService: ClientCartService,
   ) {}
 
   async findByOrFail(findOptions: FindOptionsWhere<User>): Promise<User> {
@@ -20,6 +22,7 @@ export class UserManageService {
 
     return user;
   }
+
   async findBy(findOptions: FindOptionsWhere<User>): Promise<User> {
     return this.userRepository.findOneBy(findOptions);
   }
@@ -41,6 +44,9 @@ export class UserManageService {
       user.oauth = oauth;
     }
 
-    return user.save();
+    const savedUser = await user.save();
+    await this.clientCartService.create(savedUser.id);
+
+    return savedUser;
   }
 }
