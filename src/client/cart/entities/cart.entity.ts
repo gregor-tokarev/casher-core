@@ -2,6 +2,7 @@ import {
   BaseEntity,
   Entity,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   RelationId,
@@ -21,6 +22,6 @@ export class Cart extends BaseEntity {
   @RelationId((cart: Cart) => cart.owner)
   ownerId: string;
 
-  @OneToOne(() => CartProduct, (cartProduct) => cartProduct.cart)
+  @OneToMany(() => CartProduct, (cartProduct) => cartProduct.cart)
   cartProduct: CartProduct;
 }

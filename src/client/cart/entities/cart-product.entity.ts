@@ -1,10 +1,11 @@
 import {
   BaseEntity,
+  Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
-  OneToOne,
-  PrimaryColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Cart } from './cart.entity';
@@ -12,11 +13,14 @@ import { Product } from '@core/entities/product.entity';
 
 @Entity()
 export class CartProduct extends BaseEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
   @JoinColumn()
-  @OneToOne(() => Cart, (cart) => cart.id)
+  @ManyToOne(() => Cart, (cart) => cart.id)
   cart: Cart;
 
-  @PrimaryColumn({
+  @Column({
     primary: false,
     type: 'smallint',
     default: 0,
@@ -24,7 +28,7 @@ export class CartProduct extends BaseEntity {
   count: number;
 
   @JoinColumn()
-  @OneToOne(() => Product, (product) => product.id)
+  @ManyToOne(() => Product, (product) => product.id)
   product: Product;
 
   @CreateDateColumn()

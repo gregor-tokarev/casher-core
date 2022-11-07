@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { FindOptionsWhere, In, Repository } from 'typeorm';
 import { Cart } from '../entities/cart.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ManageProductsDto } from '../dto/manage-products.dto';
 import { CartProduct } from '../entities/cart-product.entity';
+import { SetCountDto } from '../dto/set-count.dto';
 
 @Injectable()
 export class ClientCartService {
@@ -29,11 +30,7 @@ export class ClientCartService {
   async findOneOrFail(findOptions: FindOptionsWhere<Cart>) {
     const cart = await this.cartRepository.findOne({
       where: findOptions,
-      relations: {
-        cartProduct: {
-          product: true,
-        },
-      },
+      relations: ['cartProduct.product'],
     });
     if (!cart) {
       throw new NotFoundException('Cart not found');
@@ -51,12 +48,12 @@ export class ClientCartService {
       const relation = new CartProduct();
       relation.cart = cart;
       relation.count = 1;
-      await relation.save();
+      const savedRelation = await relation.save();
 
       return this.cartProductRepository
         .createQueryBuilder()
         .relation('product')
-        .of(relation)
+        .of(savedRelation)
         .set(productId);
     });
 
@@ -67,11 +64,34 @@ export class ClientCartService {
     cartId: string,
     manageProductsDto: ManageProductsDto,
   ): Promise<void> {
-    const cart = await this.findOneOrFail({ id: cartId });
-    await this.cartRepository
-      .createQueryBuilder()
-      .relation('products')
-      .of(cart.id)
-      .remove(manageProductsDto.products);
+    await this.findOneOrFail({ id: cartId });
+
+    const relations = await this.cartProductRepository.find({
+      where: { product: In(manageProductsDto.products) },
+    });
+    await Promise.all(relations.map((r) => r.remove()));
+  }
+
+  async getRelationByProductId(productId: string): Promise<CartProduct> {
+    const relation = await this.cartProductRepository
+      .createQueryBuilder('cp')
+      .andWhere('cp.product = :productId', { productId })
+      .getOne();
+    if (!relation) {
+      throw new NotFoundException('Product not found');
+    }
+
+    return relation;
+  }
+
+  async setProductCount(
+    productId: string,
+    { count }: SetCountDto,
+  ): Promise<CartProduct> {
+    const relation = await this.getRelationByProductId(productId);
+
+    relation.count = count;
+
+    return relation.save();
   }
 }
