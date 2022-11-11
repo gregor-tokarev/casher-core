@@ -8,7 +8,8 @@ export function minoConfig(
   return new Minio.Client({
     endPoint: configService.get('MINO_HOST'),
     port: configService.get('MINO_PORT'),
-    useSSL: process.env.NODE_ENV === 'production',
+    useSSL: false, // TODO: make true in production
+
     accessKey: configService.get('MINO_ACCESS_KEY'),
     secretKey: configService.get('MINO_SECRET_KEY'),
   });
