@@ -1,7 +1,6 @@
-import { IsJSON, IsOptional } from 'class-validator';
+import { IsJSON } from 'class-validator';
 
 export class EnableOauthDto {
   @IsJSON()
-  @IsOptional()
-  credentials?: string;
+  credentials: string;
 }
