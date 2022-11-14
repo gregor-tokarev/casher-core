@@ -67,9 +67,9 @@ export class PaymentOauthService {
   private checkYookassaCredentials(credentials: Record<string, string>) {
     if (!('storeID' in credentials)) {
       throw new BadRequestException('You need provide storeID in credentials');
-    } else if (!('clientSecret' in credentials)) {
+    } else if (!('secretKey' in credentials)) {
       throw new BadRequestException(
-        'You need provide clientSecret in credentials',
+        'You need provide secretKey in credentials',
       );
     }
 
