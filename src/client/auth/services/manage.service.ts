@@ -14,7 +14,7 @@ export class UserManageService {
     private readonly clientCartService: ClientCartService,
   ) {}
 
-  async findByOrFail(findOptions: FindOptionsWhere<User>): Promise<User> {
+  async findOneOrFail(findOptions: FindOptionsWhere<User>): Promise<User> {
     const user = await this.userRepository.findOneBy(findOptions);
     if (!user) {
       throw new NotFoundException('User not found');

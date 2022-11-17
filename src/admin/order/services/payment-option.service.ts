@@ -1,40 +1,25 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PaymentOption } from '../entities/payment-option.entity';
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { PaymentOption } from '@core/entities/payment-option.entity';
+import { Repository } from 'typeorm';
 import { EnablePaymentDto } from '../dto/enable-payment.dto';
+import { PaymentOptionService } from '@core/services/payment-option.service';
 
 @Injectable()
-export class PaymentOauthService {
+export class AdminPaymentOptionService {
   constructor(
     @InjectRepository(PaymentOption)
     private readonly paymentOptionRepository: Repository<PaymentOption>,
+    private readonly paymentOptionService: PaymentOptionService,
   ) {}
-
-  getAllOptions(): Promise<PaymentOption[]> {
-    return this.paymentOptionRepository.find();
-  }
-
-  async findOneOrFail(
-    findOptions: FindOptionsWhere<PaymentOption>,
-  ): Promise<PaymentOption> {
-    const payment = await this.paymentOptionRepository.findOneBy(findOptions);
-    if (!payment) {
-      throw new NotFoundException('Payment option not found');
-    }
-
-    return payment;
-  }
 
   async enableOption(
     optionId: string,
     enableDto: EnablePaymentDto,
   ): Promise<PaymentOption> {
-    const payment = await this.findOneOrFail({ id: optionId });
+    const payment = await this.paymentOptionService.findOneOrFail({
+      id: optionId,
+    });
 
     payment.enabled = true;
     payment.credentials =
@@ -44,7 +29,9 @@ export class PaymentOauthService {
   }
 
   async disableOption(optionId: string): Promise<PaymentOption> {
-    const payment = await this.findOneOrFail({ id: optionId });
+    const payment = await this.paymentOptionService.findOneOrFail({
+      id: optionId,
+    });
 
     payment.enabled = false;
 
@@ -55,7 +42,7 @@ export class PaymentOauthService {
     id: string,
     credentials: Record<string, string>,
   ): Promise<never | boolean> {
-    const option = await this.findOneOrFail({ id });
+    const option = await this.paymentOptionService.findOneOrFail({ id });
 
     if (option.name === 'yookassa') {
       this.checkYookassaCredentials(credentials);

@@ -27,10 +27,32 @@ export class ClientCartService {
     return savedCart;
   }
 
+  async clear(userId: string): Promise<Cart> {
+    const cart = await this.findByUser(userId);
+    cart.cartProduct = [];
+    return cart.save();
+  }
+
   async findOneOrFail(findOptions: FindOptionsWhere<Cart>) {
     const cart = await this.cartRepository.findOne({
       where: findOptions,
       relations: ['cartProduct.product'],
+    });
+    if (!cart) {
+      throw new NotFoundException('Cart not found');
+    }
+
+    return cart;
+  }
+
+  async findByUser(userId: string): Promise<Cart> {
+    const cart = await this.cartRepository.findOne({
+      relations: ['owner', 'cartProduct.product'],
+      where: {
+        owner: {
+          id: userId,
+        },
+      },
     });
     if (!cart) {
       throw new NotFoundException('Cart not found');

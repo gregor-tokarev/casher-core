@@ -64,7 +64,7 @@ export class ClientAuthService {
     userId: string,
     refreshToken: string,
   ): Promise<ClientTokensDto> {
-    const user = await this.userManageService.findByOrFail({ id: userId });
+    const user = await this.userManageService.findOneOrFail({ id: userId });
     const compareRes = await user.validateRefreshToken(refreshToken);
 
     if (!compareRes) {

@@ -26,6 +26,7 @@
     "typeorm:generate": "npm run build && export $(cat .env); ./node_modules/.bin/ts-node ./node_modules/.bin/typeorm migration:generate -p -d dist/src/config/typeorm-migrations.config.js"
   },
   "dependencies": {
+    "@a2seven/yoo-checkout": "^1.1.4",
     "@compodoc/compodoc": "^1.1.19",
     "@elastic/elasticsearch": "^8.4.0",
     "@nestjs/axios": "^0.1.0",

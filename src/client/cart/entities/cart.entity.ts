@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { User } from '../../entities/user.entity';
 import { CartProduct } from './cart-product.entity';
+import { Product } from '@core/entities/product.entity';
 
 @Entity()
 export class Cart extends BaseEntity {
@@ -23,5 +24,9 @@ export class Cart extends BaseEntity {
   ownerId: string;
 
   @OneToMany(() => CartProduct, (cartProduct) => cartProduct.cart)
-  cartProduct: CartProduct;
+  cartProduct: CartProduct[];
+
+  getProducts(): Product[] {
+    return this.cartProduct.map((cp) => cp.product);
+  }
 }

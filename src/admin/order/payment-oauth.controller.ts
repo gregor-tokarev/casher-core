@@ -11,16 +11,20 @@ import { AuthGuard } from '@nestjs/passport';
 import { OauthOption } from '@core/entities/oauth-option.entity';
 import { EnableOauthDto } from '../users/dto/enable-oauth.dto';
 import { OkDto } from '@core/dto/ok.dto';
-import { PaymentOauthService } from './services/payment-oauth.service';
+import { AdminPaymentOptionService } from './services/payment-option.service';
+import { PaymentOptionService } from '@core/services/payment-option.service';
 
 @UseGuards(AuthGuard('jwt-admin-access'))
 @Controller('admin/payment')
 export class PaymentOauthController {
-  constructor(private readonly paymentOauthService: PaymentOauthService) {}
+  constructor(
+    private readonly adminPaymentOptionService: AdminPaymentOptionService,
+    private readonly paymentOptionService: PaymentOptionService,
+  ) {}
 
   @Get('/option')
   getAllOauthOptions(): Promise<OauthOption[]> {
-    return this.paymentOauthService.getAllOptions();
+    return this.paymentOptionService.getAllOptions();
   }
 
   @Post('/option/:option_id/enable')
@@ -28,12 +32,12 @@ export class PaymentOauthController {
     @Param('option_id', ParseUUIDPipe) optionId: string,
     @Body() enableDto: EnableOauthDto,
   ): Promise<OkDto> {
-    await this.paymentOauthService.checkCredentials(
+    await this.adminPaymentOptionService.checkCredentials(
       optionId,
       JSON.parse(enableDto.credentials),
     );
 
-    await this.paymentOauthService.enableOption(optionId, enableDto);
+    await this.adminPaymentOptionService.enableOption(optionId, enableDto);
 
     return { message: 'ok' };
   }
@@ -42,7 +46,7 @@ export class PaymentOauthController {
   async disableOption(
     @Param('option_id', ParseUUIDPipe) optionId: string,
   ): Promise<OkDto> {
-    await this.paymentOauthService.disableOption(optionId);
+    await this.adminPaymentOptionService.disableOption(optionId);
 
     return { message: 'ok' };
   }
