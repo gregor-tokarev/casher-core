@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Body,
   Controller,
   Get,
   InternalServerErrorException,
@@ -20,6 +21,7 @@ import { ClientOrderService } from './services/order.service';
 import { ClientCartService } from '../cart/services/cart.service';
 import { ConfigService } from '@nestjs/config';
 import { EnvironmentVars } from '@config/environment-vars';
+import { CreateOrderDto } from './dto/create-order.dto';
 
 @Controller('client/order')
 export class OrderController {
@@ -33,8 +35,12 @@ export class OrderController {
 
   @UseGuards(AuthGuard('jwt-client-access'))
   @Post('/create')
-  async makeOrder(@Req() req: Request, @GetClientUser('sub') userId: string) {
-    const order = await this.clientOrderService.create(userId);
+  async makeOrder(
+    @Req() req: Request,
+    @GetClientUser('sub') userId: string,
+    @Body() createOrderDto: CreateOrderDto,
+  ) {
+    const order = await this.clientOrderService.create(userId, createOrderDto);
     // TODO: add multiple payment
     if (Array.isArray(order)) {
       throw new InternalServerErrorException(
@@ -65,7 +71,7 @@ export class OrderController {
 
     await Promise.all([
       this.clientOrderService.confirm(orderId),
-      this.clientCartService.clear(userId),
+      this.clientCartService.clear(userId, orderId),
     ]);
 
     const frontendUrl = this.configService.get('FRONTEND_URL');

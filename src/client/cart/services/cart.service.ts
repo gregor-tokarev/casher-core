@@ -5,10 +5,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ManageProductsDto } from '../dto/manage-products.dto';
 import { CartProduct } from '../entities/cart-product.entity';
 import { SetCountDto } from '../dto/set-count.dto';
+import { OrderService } from '@core/services/order.service';
 
 @Injectable()
 export class ClientCartService {
   constructor(
+    private readonly orderService: OrderService,
     @InjectRepository(Cart) private readonly cartRepository: Repository<Cart>,
     @InjectRepository(CartProduct)
     private readonly cartProductRepository: Repository<CartProduct>,
@@ -27,9 +29,15 @@ export class ClientCartService {
     return savedCart;
   }
 
-  async clear(userId: string): Promise<Cart> {
+  async clear(userId: string, orderId: string): Promise<Cart> {
     const cart = await this.findByUser(userId);
-    cart.cartProduct = [];
+    const order = await this.orderService.findOneOrFail({ id: orderId });
+
+    const orderProductsIds = order.products.map((cp) => cp.product.id);
+    cart.cartProduct = cart.cartProduct.filter(
+      (cp) => !orderProductsIds.includes(cp.product.id),
+    );
+
     return cart.save();
   }
 
@@ -66,17 +74,28 @@ export class ClientCartService {
     manageProductsDto: ManageProductsDto,
   ): Promise<void> {
     const cart = await this.findOneOrFail({ id: cartId });
-    const relations = manageProductsDto.products.map(async (productId) => {
-      const relation = new CartProduct();
-      relation.cart = cart;
-      relation.count = 1;
-      const savedRelation = await relation.save();
+    const cartProductsIds = cart.cartProduct.map((cp) => cp.product.id);
 
-      return this.cartProductRepository
-        .createQueryBuilder()
-        .relation('product')
-        .of(savedRelation)
-        .set(productId);
+    const relations = manageProductsDto.products.map(async (productId) => {
+      if (cartProductsIds.includes(productId)) {
+        const relation = cart.cartProduct.find(
+          (cp) => cp.product.id === productId,
+        );
+        relation.count += 1;
+
+        return relation.save();
+      } else {
+        const relation = new CartProduct();
+        relation.cart = cart;
+        relation.count = 1;
+        const savedRelation = await relation.save();
+
+        return this.cartProductRepository
+          .createQueryBuilder()
+          .relation('product')
+          .of(savedRelation)
+          .set(productId);
+      }
     });
 
     await Promise.all(relations);

@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from '@core/entities/order.entity';
 import { Repository } from 'typeorm';
@@ -7,6 +11,7 @@ import { Product } from '@core/entities/product.entity';
 import { CartProduct } from '../../cart/entities/cart-product.entity';
 import { OrderService } from '@core/services/order.service';
 import { OrderYookassaPayment } from '../entities/order-yookassa-payment.entity';
+import { CreateOrderDto } from '../dto/create-order.dto';
 
 @Injectable()
 export class ClientOrderService {
@@ -19,9 +24,25 @@ export class ClientOrderService {
     private readonly orderService: OrderService,
   ) {}
 
-  async create(userId): Promise<Order[] | Order> {
+  async create(
+    userId,
+    createOrderDto: CreateOrderDto,
+  ): Promise<Order[] | Order> {
     const cart = await this.cartService.findByUser(userId);
-    const products = cart.getProducts();
+    let products = cart.getProducts();
+
+    const cartProductsId = products.map((product) => product.id);
+    createOrderDto.products.forEach((productId) => {
+      if (!cartProductsId.includes(productId)) {
+        throw new BadRequestException(
+          `${productId} is not exist in cart of user ${userId}`,
+        );
+      }
+    });
+
+    products = products.filter((product) =>
+      createOrderDto.products.includes(product.id),
+    );
 
     const currencies: Record<string, CartProduct[]> = {};
     products.forEach((product, index) => {
