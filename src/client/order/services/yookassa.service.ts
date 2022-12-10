@@ -67,6 +67,8 @@ export class YookassaService {
   }
 
   async capturePayment(paymentId: string): Promise<Payment> {
+    await this.init();
+
     return this.yooCheckout.capturePayment(paymentId, {});
   }
 
