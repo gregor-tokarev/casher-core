@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { OrderController } from './order.controller';
 import { CoreModule } from '@core/core.module';
 import { YookassaService } from './services/yookassa.service';
@@ -10,10 +10,11 @@ import { OrderYookassaPayment } from './entities/order-yookassa-payment.entity';
 @Module({
   imports: [
     TypeOrmModule.forFeature([OrderYookassaPayment]),
-    CoreModule,
-    CartModule,
+    forwardRef(() => CartModule),
+    forwardRef(() => CoreModule),
   ],
   providers: [YookassaService, ClientOrderService],
   controllers: [OrderController],
+  exports: [TypeOrmModule],
 })
 export class OrderModule {}

@@ -22,6 +22,9 @@ import { ClientCartService } from '../cart/services/cart.service';
 import { ConfigService } from '@nestjs/config';
 import { EnvironmentVars } from '@config/environment-vars';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { Payment } from '@a2seven/yoo-checkout';
+import { OkDto } from '@core/dto/ok.dto';
+import { OrderService } from '@core/services/order.service';
 
 @Controller('client/order')
 export class OrderController {
@@ -29,6 +32,7 @@ export class OrderController {
     private readonly paymentOptionService: PaymentOptionService,
     private readonly yookassaService: YookassaService,
     private readonly clientOrderService: ClientOrderService,
+    private readonly orderService: OrderService,
     private readonly clientCartService: ClientCartService,
     private readonly configService: ConfigService<EnvironmentVars>,
   ) {}
@@ -64,9 +68,14 @@ export class OrderController {
     @Param('order_id', ParseUUIDPipe) orderId: string,
     @Query('user_id', ParseUUIDPipe) userId: string,
   ) {
+    const frontendUrl = this.configService.get('FRONTEND_URL');
+
     const payment = await this.yookassaService.getPaymentByOrder(orderId);
+
     if (!payment.paid) {
       throw new BadRequestException('Order not paid');
+    } else if (payment.status === 'succeeded') {
+      return { url: `${frontendUrl}/order/${orderId}/confirmed` };
     }
 
     await Promise.all([
@@ -74,7 +83,23 @@ export class OrderController {
       this.clientCartService.clear(userId, orderId),
     ]);
 
-    const frontendUrl = this.configService.get('FRONTEND_URL');
     return { url: `${frontendUrl}/order/${orderId}/confirmed` };
+  }
+
+  @Post('/yookassa-webhook')
+  async yookassaWebhook(
+    @Body() body: { event: string; type: string; object: Payment },
+  ): Promise<OkDto> {
+    if (body.event === 'payment.waiting_for_capture') {
+      await this.yookassaService.capturePayment(body.object.id);
+      const order = await this.orderService.orderByPayment(body.object.id);
+
+      await Promise.all([
+        this.clientOrderService.confirm(order.id),
+        this.clientCartService.clear(order.owner.id, order.id),
+      ]);
+    }
+
+    return { message: 'ok' };
   }
 }

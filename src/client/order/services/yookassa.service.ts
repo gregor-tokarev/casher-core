@@ -66,6 +66,10 @@ export class YookassaService {
     return payment;
   }
 
+  async capturePayment(paymentId: string): Promise<Payment> {
+    return this.yooCheckout.capturePayment(paymentId, {});
+  }
+
   async getPaymentByOrder(orderId: string): Promise<Payment> {
     await this.init();
 

@@ -2,10 +2,13 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from '@core/entities/order.entity';
 import { FindOptionsWhere, Repository } from 'typeorm';
+import { OrderYookassaPayment } from '../../client/order/entities/order-yookassa-payment.entity';
 
 @Injectable()
 export class OrderService {
   constructor(
+    @InjectRepository(OrderYookassaPayment)
+    private readonly orderYookassaPaymentRepository: Repository<OrderYookassaPayment>,
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
   ) {}
@@ -20,5 +23,13 @@ export class OrderService {
     }
 
     return order;
+  }
+
+  async orderByPayment(paymentId: string): Promise<Order> {
+    const { orderId } = await this.orderYookassaPaymentRepository.findOneBy({
+      paymentId,
+    });
+
+    return this.findOneOrFail({ id: orderId });
   }
 }

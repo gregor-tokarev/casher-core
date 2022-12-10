@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { OauthOption } from './entities/oauth-option.entity';
@@ -10,9 +10,11 @@ import { PaymentOption } from '@core/entities/payment-option.entity';
 import { PaymentOptionService } from '@core/services/payment-option.service';
 import { OrderService } from '@core/services/order.service';
 import { Order } from '@core/entities/order.entity';
+import { OrderModule } from '../client/order/order.module';
 
 @Module({
   imports: [
+    forwardRef(() => OrderModule),
     TypeOrmModule.forFeature([
       Product,
       Review,
