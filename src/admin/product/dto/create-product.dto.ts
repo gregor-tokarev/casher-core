@@ -4,7 +4,6 @@ import {
   IsJSON,
   IsNotEmpty,
   IsOptional,
-  Length,
   MaxLength,
 } from 'class-validator';
 
@@ -13,7 +12,6 @@ export class CreateProductDto {
   @IsNotEmpty()
   title: string;
 
-  @Length(20, 10000)
   @IsNotEmpty()
   description: string;
 

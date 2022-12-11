@@ -52,7 +52,7 @@ export class ProductController {
   @UseInterceptors(
     FilesInterceptor('photos', 10, {
       fileFilter: fileMimetypeFilter('image'),
-      limits: { fieldSize: 100 },
+      limits: { fieldSize: 100 * 1024 },
     }),
   )
   @Permissions(AdminPermissions.CREATE_PRODUCTS)
