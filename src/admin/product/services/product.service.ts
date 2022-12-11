@@ -60,6 +60,11 @@ export class AdminProductService {
         .relation(Product, 'photos')
         .of(savedProduct)
         .add(savedPhotos),
+      this.productRepository
+        .createQueryBuilder()
+        .relation(Product, 'category')
+        .of(savedProduct)
+        .set(createProductDto.categoryId),
     ]);
 
     await this.searchService.addToIndex(this.productsIndex, {

@@ -4,6 +4,7 @@ import {
   IsJSON,
   IsNotEmpty,
   IsOptional,
+  IsUUID,
   MaxLength,
 } from 'class-validator';
 
@@ -28,4 +29,8 @@ export class CreateProductDto {
   @IsJSON()
   @IsOptional()
   additionalFields?: string;
+
+  @IsUUID()
+  @IsNotEmpty()
+  categoryId: string;
 }
