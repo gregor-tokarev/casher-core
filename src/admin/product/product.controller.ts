@@ -23,7 +23,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { AdminProductService } from './services/product.service';
 import { GetAdminUser } from '../auth/decorators/get-user.decorator';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { SearchProductsDto } from './dto/search-products.dto';
+import { AdminSearchProductsDto } from './dto/search-products.dto';
 import { ProductService } from '@core/services/product.service';
 import { ReviewService } from '@core/services/review.service';
 import { Review } from '@core/entities/review.entity';
@@ -42,8 +42,10 @@ export class ProductController {
 
   @HttpCode(HttpStatus.OK)
   @Get()
-  async getProducts(@Query() query: SearchProductsDto): Promise<Product[]> {
-    return this.adminProductService.search(query);
+  async getProducts(
+    @Query() query: AdminSearchProductsDto,
+  ): Promise<Product[]> {
+    return this.productService.search(query);
   }
 
   @HttpCode(HttpStatus.CREATED)

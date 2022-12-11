@@ -11,10 +11,12 @@ import { PaymentOptionService } from '@core/services/payment-option.service';
 import { OrderService } from '@core/services/order.service';
 import { Order } from '@core/entities/order.entity';
 import { OrderModule } from '../client/order/order.module';
+import { SearchModule } from '../search/search.module';
 
 @Module({
   imports: [
     forwardRef(() => OrderModule),
+    SearchModule,
     TypeOrmModule.forFeature([
       Product,
       Review,

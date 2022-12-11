@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { Product } from '@core/entities/product.entity';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { SearchService } from '../../../search/search.service';
-import { SearchProductsDto } from '../dto/search-products.dto';
 import { FileService } from '../../../file/file.service';
 import { ProductService } from '@core/services/product.service';
 import { DeletePhotosDto } from '../dto/delete-photos.dto';
@@ -73,20 +72,6 @@ export class AdminProductService {
     savedProduct.photos = savedPhotos;
 
     return savedProduct;
-  }
-
-  async search(searchProductsDto: SearchProductsDto): Promise<Product[]> {
-    const searchRes = await this.searchService.search(
-      'products',
-      searchProductsDto.q,
-      ['title', 'description'],
-      searchProductsDto.top,
-      searchProductsDto.skip,
-    );
-
-    return await this.productRepository.findBy({
-      id: In(searchRes.map((item) => item.id)),
-    });
   }
 
   async update(

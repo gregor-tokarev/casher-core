@@ -1,11 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from '@core/entities/product.entity';
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { FindOptionsWhere, In, Repository } from 'typeorm';
+import { AdminSearchProductsDto } from '../../admin/product/dto/search-products.dto';
+import { SearchService } from '../../search/search.service';
 
 @Injectable()
 export class ProductService {
   constructor(
+    private readonly searchService: SearchService,
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
   ) {}
@@ -20,5 +23,19 @@ export class ProductService {
     }
 
     return product;
+  }
+
+  async search(searchProductsDto: AdminSearchProductsDto): Promise<Product[]> {
+    const searchRes = await this.searchService.search(
+      'products',
+      searchProductsDto.q,
+      ['title', 'description'],
+      searchProductsDto.top,
+      searchProductsDto.skip,
+    );
+
+    return await this.productRepository.findBy({
+      id: In(searchRes.map((item) => item.id)),
+    });
   }
 }

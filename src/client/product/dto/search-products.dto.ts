@@ -1,6 +1,6 @@
 import { IsOptional, IsString } from 'class-validator';
 
-export class AdminSearchProductsDto {
+export class ClientSearchProductsDto {
   @IsOptional()
   top?: number;
 
