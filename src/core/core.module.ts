@@ -12,6 +12,8 @@ import { OrderService } from '@core/services/order.service';
 import { Order } from '@core/entities/order.entity';
 import { OrderModule } from '../client/order/order.module';
 import { SearchModule } from '../search/search.module';
+import { Category } from '@core/entities/category.entity';
+import { CategoryService } from '@core/services/category.service';
 
 @Module({
   imports: [
@@ -23,6 +25,7 @@ import { SearchModule } from '../search/search.module';
       OauthOption,
       PaymentOption,
       Order,
+      Category,
     ]),
   ],
   providers: [
@@ -31,6 +34,7 @@ import { SearchModule } from '../search/search.module';
     ProductService,
     ReviewService,
     OrderService,
+    CategoryService,
   ],
   exports: [
     TypeOrmModule,
@@ -39,6 +43,7 @@ import { SearchModule } from '../search/search.module';
     ReviewService,
     PaymentOptionService,
     OrderService,
+    CategoryService,
   ],
 })
 export class CoreModule {}

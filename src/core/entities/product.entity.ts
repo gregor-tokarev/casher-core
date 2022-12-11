@@ -12,6 +12,7 @@ import {
 } from 'typeorm';
 import { AdminUser } from '../../admin/entities/admin-user.entity';
 import { File } from '../../file/file.entity';
+import { Category } from '@core/entities/category.entity';
 
 @Entity()
 export class Product extends BaseEntity {
@@ -59,6 +60,10 @@ export class Product extends BaseEntity {
 
   @Column()
   priceCurrency: 'ruble' | 'dollar';
+
+  @JoinColumn()
+  @ManyToOne(() => Category, (category) => category.id)
+  category: Category;
 
   @Column({
     type: 'json',
