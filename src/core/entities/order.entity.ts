@@ -23,12 +23,12 @@ export class Order extends BaseEntity {
   createdAt: string;
 
   @UpdateDateColumn()
-  paidAt: string;
+  updatedAt: string;
 
   @Column({
-    default: false,
+    default: 'created',
   })
-  paid: boolean;
+  status: 'created' | 'paid' | 'delivery' | 'succeeded';
 
   @Column({
     type: 'varchar',

@@ -84,7 +84,7 @@ export class ClientOrderService {
 
   async confirm(orderId: string): Promise<Order> {
     const order = await this.orderService.findOneOrFail({ id: orderId });
-    order.paid = true;
+    order.status = 'paid';
 
     return order.save();
   }
