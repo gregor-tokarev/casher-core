@@ -6,7 +6,7 @@ export class paymentOptions1668313108589 implements MigrationInterface {
         create table "payment_option"
         (
             id uuid not null primary key default uuid_generate_v4(),
-            name text not null,
+            name text,
             enabled boolean default false,
             credentials json
         )
