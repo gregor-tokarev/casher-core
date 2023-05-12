@@ -3,7 +3,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 export class paymentOptions1668313108589 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
-        create table "payment_option"
+        create table if not exists "payment_option"
         (
             id uuid not null primary key default uuid_generate_v4(),
             name text,
