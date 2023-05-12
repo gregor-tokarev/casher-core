@@ -30,6 +30,7 @@ import { AccessAdminGuard } from './guards/access-admin.guard';
 import { ChangePermissionsDto } from './dto/change-permissions.dto';
 import { AdminAuthManageService } from './services/manage.service';
 import { AllAdminsDto } from './dto/all-admins.dto';
+import { raw } from 'express';
 
 @Controller('admin/auth')
 export class AuthController {
@@ -49,6 +50,16 @@ export class AuthController {
     }
 
     return this.adminAuthService.signup(createAdminDto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('/has-any-admin')
+  async hasAnyAdmin(): Promise<OkDto> {
+    const admins = await this.adminManageService.findAll();
+
+    return {
+      message: admins.length > 0 ? 'yes' : 'no',
+    };
   }
 
   @HttpCode(HttpStatus.OK)

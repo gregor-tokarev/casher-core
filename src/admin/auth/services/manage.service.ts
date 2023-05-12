@@ -18,7 +18,7 @@ export class AdminAuthManageService {
     private readonly adminUserRepository: Repository<AdminUser>,
   ) {}
 
-  async findAll(top: number, skip: number): Promise<AdminUser[]> {
+  async findAll(top = 10, skip = 0): Promise<AdminUser[]> {
     return this.adminUserRepository.find({ take: top, skip });
   }
 
