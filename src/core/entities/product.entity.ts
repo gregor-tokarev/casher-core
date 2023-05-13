@@ -7,12 +7,15 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { AdminUser } from '../../admin/entities/admin-user.entity';
 import { File } from '../../file/file.entity';
 import { Category } from '@core/entities/category.entity';
+import { Review } from '@core/entities/review.entity';
+import { CartProduct } from '../../client/cart/entities/cart-product.entity';
 
 @Entity()
 export class Product extends BaseEntity {
@@ -49,6 +52,12 @@ export class Product extends BaseEntity {
   @JoinColumn()
   @ManyToOne(() => AdminUser, (adminUser) => adminUser.id)
   updatedBy: AdminUser;
+
+  @OneToMany(() => Review, (review) => review.product)
+  reviews: Review[];
+
+  @OneToMany(() => CartProduct, (cartProduct) => cartProduct.product)
+  cartProducts: CartProduct[];
 
   @Column()
   price: number;

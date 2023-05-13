@@ -8,6 +8,8 @@ import { SearchService } from '../../../search/search.service';
 import { FileService } from '../../../file/file.service';
 import { ProductService } from '@core/services/product.service';
 import { DeletePhotosDto } from '../dto/delete-photos.dto';
+import { AdminProductResponseDto } from '../dto/proeduct-response.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class AdminProductService {
@@ -77,6 +79,35 @@ export class AdminProductService {
     savedProduct.photos = savedPhotos;
 
     return savedProduct;
+  }
+
+  async generateAdminRes(
+    productIds: string[],
+  ): Promise<AdminProductResponseDto[]> {
+    const products = await this.productRepository
+      .createQueryBuilder('p')
+      .select('p')
+      .where('p.id in (:...ids)', { ids: productIds })
+      .leftJoinAndSelect('p.reviews', 'r')
+      .leftJoinAndSelect('p.cartProducts', 'cp')
+      .getMany();
+
+    return plainToInstance(
+      AdminProductResponseDto,
+      products.map((p) => ({
+        ...p,
+        reviews: undefined,
+        cartProducts: undefined,
+        overallRating: p.reviews.length
+          ? p.reviews.reduce((acc, r) => (acc += r.score), 0) / p.reviews.length
+          : -1,
+        revenue: p.cartProducts.reduce(
+          (acc, cp) => (acc += cp.count * p.price),
+          0,
+        ),
+        soldCount: p.cartProducts.reduce((acc, cp) => (acc += cp.count), 0),
+      })),
+    );
   }
 
   async update(

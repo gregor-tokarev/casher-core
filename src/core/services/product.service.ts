@@ -25,7 +25,9 @@ export class ProductService {
     return product;
   }
 
-  async search(searchProductsDto: AdminSearchProductsDto): Promise<Product[]> {
+  async searchIds(
+    searchProductsDto: AdminSearchProductsDto,
+  ): Promise<string[]> {
     const searchRes = await this.searchService.search(
       'products',
       searchProductsDto.q,
@@ -34,8 +36,16 @@ export class ProductService {
       searchProductsDto.skip,
     );
 
-    return await this.productRepository.findBy({
-      id: In(searchRes.map((item) => item.id)),
+    return searchRes.map((item) => item.id);
+  }
+
+  async search(searchProductsDto: AdminSearchProductsDto): Promise<Product[]> {
+    const searchRes = await this.searchIds(searchProductsDto);
+
+    return await this.productRepository.find({
+      where: {
+        id: In(searchRes),
+      },
     });
   }
 }

@@ -30,6 +30,7 @@ import { Review } from '@core/entities/review.entity';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { fileMimetypeFilter } from '../../file/utils/file-mimetype-filter';
 import { DeletePhotosDto } from './dto/delete-photos.dto';
+import { AdminProductResponseDto } from './dto/proeduct-response.dto';
 
 @UseGuards(AuthGuard('jwt-admin-access'))
 @Controller('admin/product')
@@ -44,8 +45,10 @@ export class ProductController {
   @Get()
   async getProducts(
     @Query() query: AdminSearchProductsDto,
-  ): Promise<Product[]> {
-    return this.productService.search(query);
+  ): Promise<AdminProductResponseDto[]> {
+    const products = await this.productService.searchIds(query);
+
+    return this.adminProductService.generateAdminRes(products);
   }
 
   @HttpCode(HttpStatus.CREATED)
