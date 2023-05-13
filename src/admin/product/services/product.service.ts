@@ -99,13 +99,19 @@ export class AdminProductService {
         reviews: undefined,
         cartProducts: undefined,
         overallRating: p.reviews.length
-          ? p.reviews.reduce((acc, r) => (acc += r.score), 0) / p.reviews.length
+          ? p.reviews.reduce((acc, r) => {
+              acc += r.score;
+              return acc;
+            }, 0) / p.reviews.length
           : -1,
-        revenue: p.cartProducts.reduce(
-          (acc, cp) => (acc += cp.count * p.price),
-          0,
-        ),
-        soldCount: p.cartProducts.reduce((acc, cp) => (acc += cp.count), 0),
+        revenue: p.cartProducts.reduce((acc, cp) => {
+          acc += cp.count * p.price;
+          return acc;
+        }, 0),
+        soldCount: p.cartProducts.reduce((acc, cp) => {
+          acc += cp.count;
+          return acc;
+        }, 0),
       })),
     );
   }
