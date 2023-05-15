@@ -10,6 +10,7 @@ import { ProductService } from '@core/services/product.service';
 import { DeletePhotosDto } from '../dto/delete-photos.dto';
 import { AdminProductResponseDto } from '../dto/proeduct-response.dto';
 import { plainToInstance } from 'class-transformer';
+import { CategoryService } from '@core/services/category.service';
 
 @Injectable()
 export class AdminProductService {
@@ -17,6 +18,7 @@ export class AdminProductService {
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
     private readonly searchService: SearchService,
+    private readonly categoryService: CategoryService,
     private readonly fileService: FileService,
     private readonly productService: ProductService,
   ) {}
@@ -28,6 +30,10 @@ export class AdminProductService {
     photos: Express.Multer.File[],
     createProductDto: CreateProductDto,
   ): Promise<Product> {
+    await this.categoryService.findOneOrFail({
+      id: createProductDto.categoryId,
+    });
+
     const product = new Product();
     product.title = createProductDto.title;
     product.description = createProductDto.description;
