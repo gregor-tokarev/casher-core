@@ -11,8 +11,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Product } from '@core/entities/product.entity';
-import { User } from '../../client/entities/user.entity';
 import { CartProduct } from '../../client/cart/entities/cart-product.entity';
+import { User } from '@core/entities/user.entity';
 
 @Entity()
 export class Order extends BaseEntity {

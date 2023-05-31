@@ -6,12 +6,14 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { UserOauth } from './user-oauth.entity';
 import { compare, hash } from 'bcrypt';
 import { UnauthorizedException } from '@nestjs/common';
+import { UserOauth } from '../../client/entities/user-oauth.entity';
+import { Order } from '@core/entities/order.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -47,6 +49,9 @@ export class User extends BaseEntity {
     cascade: true,
   })
   oauth?: UserOauth;
+
+  @OneToMany(() => Order, (order) => order.owner)
+  order: Order;
 
   @BeforeInsert()
   async beforeInsert() {

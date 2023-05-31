@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../../entities/user.entity';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UserOauth } from '../../entities/user-oauth.entity';
 import { ClientCartService } from '../../cart/services/cart.service';
+import { User } from '@core/entities/user.entity';
 
 @Injectable()
 export class UserManageService {

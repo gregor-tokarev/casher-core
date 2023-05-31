@@ -14,6 +14,7 @@ import { OrderModule } from '../client/order/order.module';
 import { SearchModule } from '../search/search.module';
 import { Category } from '@core/entities/category.entity';
 import { CategoryService } from '@core/services/category.service';
+import { User } from '@core/entities/user.entity';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { CategoryService } from '@core/services/category.service';
       PaymentOption,
       Order,
       Category,
+      User,
     ]),
   ],
   providers: [

@@ -8,9 +8,9 @@ import { EnvironmentVars } from '@config/environment-vars';
 import { JwtService } from '@nestjs/jwt';
 import { IsNull, Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../../entities/user.entity';
 import { ClientTokensDto } from '../dto/tokens.dto';
 import { UserManageService } from './manage.service';
+import { User } from '@core/entities/user.entity';
 
 @Injectable()
 export class ClientAuthService {

@@ -6,10 +6,19 @@ import {
 import { OauthOption } from '@core/entities/oauth-option.entity';
 import { EnableOauthDto } from '../dto/enable-oauth.dto';
 import { OauthOptionService } from '@core/services/oauth-option.service';
+import { UserResponseDto } from '../dto/users-response.dto';
+import { UsersRequestDto } from '../dto/users-request.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from '@core/entities/user.entity';
+import { Repository } from 'typeorm';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class AdminUserService {
-  constructor(private readonly oauthOptionService: OauthOptionService) {}
+  constructor(
+    private readonly oauthOptionService: OauthOptionService,
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
+  ) {}
 
   async getAllOauthOptions(): Promise<OauthOption[]> {
     return this.oauthOptionService.getAll();
@@ -84,5 +93,23 @@ export class AdminUserService {
     }
 
     return true;
+  }
+
+  async getAllUsers(
+    usersRequestDto: UsersRequestDto,
+  ): Promise<UserResponseDto[]> {
+    const users = await this.userRepository.find({
+      skip: usersRequestDto.skip,
+      take: usersRequestDto.limit,
+      relations: ['order'],
+    });
+
+    return users.map((u) =>
+      plainToInstance(UserResponseDto, {
+        ...u,
+        totalOrder: u.order.calculatePrice(),
+        order: undefined,
+      }),
+    );
   }
 }

@@ -4,8 +4,6 @@ import { UserManageService } from './services/manage.service';
 import { CoreModule } from '@core/core.module';
 import { YandexAuthController } from './yandex-auth.controller';
 import { HttpModule } from '@nestjs/axios';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../entities/user.entity';
 import { VkAuthController } from './vk-auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { ClientRefreshTokenStrategy } from './strategies/client-refresh-token.strategy';
@@ -14,13 +12,7 @@ import { ClientAuthController } from './auth.controller';
 import { CartModule } from '../cart/cart.module';
 
 @Module({
-  imports: [
-    CoreModule,
-    HttpModule,
-    CartModule,
-    TypeOrmModule.forFeature([User]),
-    JwtModule.register({}),
-  ],
+  imports: [CoreModule, HttpModule, CartModule, JwtModule.register({})],
   providers: [
     ClientAuthService,
     UserManageService,

@@ -11,9 +11,9 @@ import {
   RelationId,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from '../../client/entities/user.entity';
 import { Product } from '@core/entities/product.entity';
 import { File } from '../../file/file.entity';
+import { User } from '@core/entities/user.entity';
 
 @Entity()
 export class Review extends BaseEntity {

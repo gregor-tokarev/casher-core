@@ -1,5 +1,5 @@
 import { UserOauth } from '../../entities/user-oauth.entity';
-import { User } from '../../entities/user.entity';
+import { User } from '@core/entities/user.entity';
 
 export class CreateUserDto {
   name: string;

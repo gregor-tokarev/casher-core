@@ -5,6 +5,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -12,11 +13,20 @@ import { OauthOption } from '@core/entities/oauth-option.entity';
 import { AdminUserService } from './services/user.service';
 import { OkDto } from '@core/dto/ok.dto';
 import { EnableOauthDto } from './dto/enable-oauth.dto';
+import { UserResponseDto } from './dto/users-response.dto';
+import { UsersRequestDto } from './dto/users-request.dto';
 
 @UseGuards(AuthGuard('jwt-admin-access'))
 @Controller('admin/users')
 export class AdminUsersController {
   constructor(private readonly userService: AdminUserService) {}
+
+  @Get()
+  getAllUsers(
+    @Query() usersRequestDto: UsersRequestDto,
+  ): Promise<UserResponseDto[]> {
+    return this.userService.getAllUsers(usersRequestDto);
+  }
 
   @Get('/oauth')
   getAllOauthOptions(): Promise<OauthOption[]> {

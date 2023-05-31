@@ -7,9 +7,9 @@ import {
   PrimaryGeneratedColumn,
   RelationId,
 } from 'typeorm';
-import { User } from '../../entities/user.entity';
 import { CartProduct } from './cart-product.entity';
 import { Product } from '@core/entities/product.entity';
+import { User } from '@core/entities/user.entity';
 
 @Entity()
 export class Cart extends BaseEntity {

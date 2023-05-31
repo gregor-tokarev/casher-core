@@ -5,7 +5,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { User } from './user.entity';
+import { User } from '@core/entities/user.entity';
 
 @Entity()
 export class UserOauth extends BaseEntity {
