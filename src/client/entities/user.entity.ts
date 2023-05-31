@@ -3,6 +3,7 @@ import {
   BeforeInsert,
   BeforeUpdate,
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   OneToOne,
@@ -27,6 +28,9 @@ export class User extends BaseEntity {
 
   @Column()
   surname: string;
+
+  @CreateDateColumn()
+  createdAt: string;
 
   @Column({
     nullable: true,
