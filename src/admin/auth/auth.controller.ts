@@ -62,6 +62,16 @@ export class AuthController {
   }
 
   @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard('jwt-admin-access'))
+  @Get('/current')
+  async getCurrentAdmin(
+    @GetAdminUser('sub') adminId: string,
+  ): Promise<Partial<AdminUser>> {
+    const admin = await this.adminManageService.findByOrFail({ id: adminId });
+    return admin.publicView();
+  }
+
+  @HttpCode(HttpStatus.OK)
   @Post('/login')
   async login(@Body() body: LoginAdminDto): Promise<AdminTokensDto> {
     return this.adminAuthService.login(body);
