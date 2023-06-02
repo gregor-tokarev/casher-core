@@ -59,10 +59,7 @@ export class ProductController {
   )
   @Permissions(AdminPermissions.CREATE_PRODUCTS)
   @Post()
-  async createProduct(
-    @GetAdminUser('sub') adminId: string,
-    @UploadedFiles() photos: Express.Multer.File[],
-  ): Promise<Product> {
+  async createProduct(@GetAdminUser('sub') adminId: string): Promise<Product> {
     return this.adminProductService.create(adminId);
   }
 
