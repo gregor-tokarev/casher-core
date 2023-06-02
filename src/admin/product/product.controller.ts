@@ -50,6 +50,14 @@ export class ProductController {
     return this.adminProductService.generateAdminRes(products);
   }
 
+  @HttpCode(HttpStatus.OK)
+  @Get('/:productId')
+  async getProduct(
+    @Param('productId', ParseUUIDPipe) productId: string,
+  ): Promise<Product> {
+    return this.productService.findByOrFail({ id: productId });
+  }
+
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(
     FilesInterceptor('photos', 10, {
