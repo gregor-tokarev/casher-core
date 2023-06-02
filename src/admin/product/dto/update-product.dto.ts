@@ -1,11 +1,4 @@
-import {
-  IsIn,
-  IsJSON,
-  IsNumber,
-  IsOptional,
-  Length,
-  MaxLength,
-} from 'class-validator';
+import { IsIn, IsJSON, IsNumber, IsOptional, MaxLength } from 'class-validator';
 import { Product } from '@core/entities/product.entity';
 
 export class UpdateProductDto {
@@ -13,7 +6,7 @@ export class UpdateProductDto {
   @IsOptional()
   title?: string;
 
-  @Length(20, 10000)
+  @MaxLength(10000)
   @IsOptional()
   description?: string;
 

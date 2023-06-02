@@ -89,7 +89,9 @@ export class AdminProductService {
         { id: productId },
         {
           ...updateProductDto,
-          additionalFields: JSON.parse(updateProductDto.additionalFields),
+          additionalFields: JSON.parse(
+            updateProductDto.additionalFields ?? '{}',
+          ),
         },
       ),
       this.searchService.updateInIndex(
