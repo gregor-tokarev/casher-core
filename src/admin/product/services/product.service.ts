@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { CreateProductDto } from '../dto/create-product.dto';
 import { Product } from '@core/entities/product.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -25,64 +24,22 @@ export class AdminProductService {
 
   private readonly productsIndex = 'products';
 
-  async create(
-    addedBy: string,
-    photos: Express.Multer.File[],
-    createProductDto: CreateProductDto,
-  ): Promise<Product> {
-    await this.categoryService.findOneOrFail({
-      id: createProductDto.categoryId,
-    });
-
+  async create(addedBy: string): Promise<Product> {
     const product = new Product();
-    product.title = createProductDto.title;
-    product.description = createProductDto.description;
-    product.price = createProductDto.price;
-    product.priceWithDiscount = createProductDto.priceWithDiscount;
-    product.priceCurrency = createProductDto.priceCurrency;
-    product.additionalFields = createProductDto.additionalFields
-      ? JSON.parse(createProductDto.additionalFields)
-      : {};
 
     const savedProduct = await product.save();
 
-    const savedPhotos = await Promise.all(
-      photos.map((photo) =>
-        this.fileService.addAdminFile({ file: photo, userId: addedBy }),
-      ),
-    );
-
-    await Promise.all([
-      this.productRepository
-        .createQueryBuilder()
-        .relation(Product, 'addedBy')
-        .of(savedProduct)
-        .set(addedBy),
-      this.productRepository
-        .createQueryBuilder()
-        .relation(Product, 'updatedBy')
-        .of(savedProduct)
-        .set(addedBy),
-      this.productRepository
-        .createQueryBuilder()
-        .relation(Product, 'photos')
-        .of(savedProduct)
-        .add(savedPhotos),
-      this.productRepository
-        .createQueryBuilder()
-        .relation(Product, 'category')
-        .of(savedProduct)
-        .set(createProductDto.categoryId),
-    ]);
-
     await this.searchService.addToIndex(this.productsIndex, {
       id: product.id,
-      title: product.title,
-      description: product.description,
-      ...product.additionalFields,
+      title: '',
+      description: '',
     });
 
-    savedProduct.photos = savedPhotos;
+    await this.productRepository
+      .createQueryBuilder()
+      .relation(Product, 'addedBy')
+      .of(savedProduct)
+      .set(addedBy);
 
     return savedProduct;
   }

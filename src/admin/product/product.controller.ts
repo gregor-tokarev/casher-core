@@ -19,7 +19,6 @@ import { AuthGuard } from '@nestjs/passport';
 import { AdminPermissions } from '../entities/admin-user.entity';
 import { Product } from '@core/entities/product.entity';
 import { Permissions } from '../auth/decorators/set-permission.decorator';
-import { CreateProductDto } from './dto/create-product.dto';
 import { AdminProductService } from './services/product.service';
 import { GetAdminUser } from '../auth/decorators/get-user.decorator';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -62,10 +61,9 @@ export class ProductController {
   @Post()
   async createProduct(
     @GetAdminUser('sub') adminId: string,
-    @Body() createProductDto: CreateProductDto,
     @UploadedFiles() photos: Express.Multer.File[],
   ): Promise<Product> {
-    return this.adminProductService.create(adminId, photos, createProductDto);
+    return this.adminProductService.create(adminId);
   }
 
   @HttpCode(HttpStatus.OK)

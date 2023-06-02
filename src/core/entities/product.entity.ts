@@ -22,10 +22,10 @@ export class Product extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ nullable: true })
   createdAt: string;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ nullable: true })
   updatedAt: string;
 
   @Column({
@@ -33,7 +33,7 @@ export class Product extends BaseEntity {
   })
   draft: boolean;
 
-  @Column()
+  @Column({ nullable: true })
   title: string;
 
   @Column({
@@ -59,7 +59,7 @@ export class Product extends BaseEntity {
   @OneToMany(() => CartProduct, (cartProduct) => cartProduct.product)
   cartProducts: CartProduct[];
 
-  @Column()
+  @Column({ nullable: true })
   price: number;
 
   @Column({
@@ -67,7 +67,7 @@ export class Product extends BaseEntity {
   })
   priceWithDiscount?: number;
 
-  @Column()
+  @Column({ nullable: true })
   priceCurrency: 'ruble' | 'dollar';
 
   @JoinColumn()
