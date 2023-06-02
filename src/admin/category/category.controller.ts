@@ -35,6 +35,12 @@ export class CategoryController {
   }
 
   @HttpCode(HttpStatus.OK)
+  @Get('/all')
+  getAllCategories(): Promise<Category[]> {
+    return this.categoryService.allCategories();
+  }
+
+  @HttpCode(HttpStatus.OK)
   @Get('/:category_id')
   async getCategoryTree(
     @Param('category_id', ParseUUIDPipe) categoryId: string,

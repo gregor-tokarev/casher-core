@@ -51,4 +51,8 @@ export class CategoryService {
   public topCategories(): Promise<Category[]> {
     return this.categoryRepository.findBy({ level: 1 });
   }
+
+  allCategories(): Promise<Category[]> {
+    return this.categoryRepository.find();
+  }
 }
