@@ -24,6 +24,10 @@ export class nullableProduct1685668408998 implements MigrationInterface {
         ALTER TABLE "product"
             ALTER COLUMN "priceCurrency" DROP NOT NULL
     `);
+    await queryRunner.query(`
+        ALTER TABLE "product"
+            ALTER COLUMN "description" DROP NOT NULL
+    `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
@@ -50,6 +54,11 @@ export class nullableProduct1685668408998 implements MigrationInterface {
     await queryRunner.query(`
         ALTER TABLE "product"
             ALTER COLUMN "createdAt"
+                SET NOT NULL
+    `);
+    await queryRunner.query(`
+        ALTER TABLE "product"
+            ALTER COLUMN "description"
                 SET NOT NULL
     `);
   }

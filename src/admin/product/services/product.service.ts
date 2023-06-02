@@ -26,6 +26,7 @@ export class AdminProductService {
 
   async create(addedBy: string): Promise<Product> {
     const product = new Product();
+    product.draft = true;
 
     const savedProduct = await product.save();
 

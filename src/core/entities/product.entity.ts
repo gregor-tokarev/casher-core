@@ -38,6 +38,7 @@ export class Product extends BaseEntity {
 
   @Column({
     type: 'text',
+    nullable: true,
   })
   description: string;
 
