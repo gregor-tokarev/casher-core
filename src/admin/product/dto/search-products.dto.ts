@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsArray, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class AdminSearchProductsDto {
@@ -12,4 +12,8 @@ export class AdminSearchProductsDto {
 
   @IsString()
   q: string;
+
+  @IsArray()
+  @IsOptional()
+  categories?: string[];
 }

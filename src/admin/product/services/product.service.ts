@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Product } from '@core/entities/product.entity';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { SearchService } from '../../../search/search.service';
@@ -52,12 +52,13 @@ export class AdminProductService {
   ): Promise<AdminProductResponseDto> {
     let productsQuery = this.productRepository
       .createQueryBuilder('p')
-      .select('p')
       .leftJoinAndSelect('p.reviews', 'r')
       .leftJoinAndSelect('p.cartProducts', 'cp')
       .leftJoinAndSelect('p.photos', 'ph')
       .leftJoinAndSelect('p.category', 'c')
       .orderBy('p.updatedAt');
+
+    productsQuery = this.addFiltersOnQuery(productsQuery, query);
 
     if (productIds.length) {
       productsQuery = productsQuery.where('p.id in (:...ids)', {
@@ -90,9 +91,30 @@ export class AdminProductService {
     }));
 
     return plainToInstance(AdminProductResponseDto, {
-      count: productIds.length || (await this.productRepository.count()),
+      count: productIds.length || (await this.count(query)),
       products: processedProducts,
     });
+  }
+
+  private addFiltersOnQuery(
+    query: SelectQueryBuilder<Product>,
+    q: AdminSearchProductsDto,
+  ) {
+    let newQuery = query;
+    if (q.categories) {
+      newQuery = newQuery.where('p.category in (:...ids)', {
+        ids: q.categories,
+      });
+    }
+
+    return newQuery;
+  }
+
+  async count(q: AdminSearchProductsDto): Promise<number> {
+    let query = this.productRepository.createQueryBuilder('p');
+    query = this.addFiltersOnQuery(query, q);
+
+    return query.getCount();
   }
 
   async update(
