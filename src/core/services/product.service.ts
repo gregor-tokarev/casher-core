@@ -17,6 +17,7 @@ export class ProductService {
     const product = this.productRepository.findOne({
       where: findOptions,
       relations: ['photos'],
+      loadRelationIds: { relations: ['category'] },
     });
     if (!product) {
       throw new NotFoundException('Product not found');
@@ -32,8 +33,6 @@ export class ProductService {
       'products',
       searchProductsDto.q,
       ['title', 'description'],
-      searchProductsDto.top,
-      searchProductsDto.skip,
     );
 
     return searchRes.map((item) => item.id);

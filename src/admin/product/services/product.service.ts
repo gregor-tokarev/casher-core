@@ -10,6 +10,7 @@ import { DeletePhotosDto } from '../dto/delete-photos.dto';
 import { AdminProductResponseDto } from '../dto/proeduct-response.dto';
 import { plainToInstance } from 'class-transformer';
 import { CategoryService } from '@core/services/category.service';
+import { AdminSearchProductsDto } from '../dto/search-products.dto';
 
 @Injectable()
 export class AdminProductService {
@@ -47,37 +48,51 @@ export class AdminProductService {
 
   async generateAdminRes(
     productIds: string[],
-  ): Promise<AdminProductResponseDto[]> {
-    const products = await this.productRepository
+    query: AdminSearchProductsDto,
+  ): Promise<AdminProductResponseDto> {
+    let productsQuery = this.productRepository
       .createQueryBuilder('p')
       .select('p')
-      .where('p.id in (:...ids)', { ids: productIds })
       .leftJoinAndSelect('p.reviews', 'r')
       .leftJoinAndSelect('p.cartProducts', 'cp')
-      .getMany();
+      .leftJoinAndSelect('p.photos', 'ph')
+      .leftJoinAndSelect('p.category', 'c')
+      .orderBy('p.updatedAt');
 
-    return plainToInstance(
-      AdminProductResponseDto,
-      products.map((p) => ({
-        ...p,
-        reviews: undefined,
-        cartProducts: undefined,
-        overallRating: p.reviews.length
-          ? p.reviews.reduce((acc, r) => {
-              acc += r.score;
-              return acc;
-            }, 0) / p.reviews.length
-          : -1,
-        revenue: p.cartProducts.reduce((acc, cp) => {
-          acc += cp.count * p.price;
-          return acc;
-        }, 0),
-        soldCount: p.cartProducts.reduce((acc, cp) => {
-          acc += cp.count;
-          return acc;
-        }, 0),
-      })),
-    );
+    if (productIds.length) {
+      productsQuery = productsQuery.where('p.id in (:...ids)', {
+        ids: productIds,
+      });
+    } else {
+      productsQuery = productsQuery.skip(query.skip).take(query.top);
+    }
+
+    const products = await productsQuery.getMany();
+
+    const processedProducts = products.map((p) => ({
+      ...p,
+      reviews: undefined,
+      cartProducts: undefined,
+      overallRating: p.reviews.length
+        ? p.reviews.reduce((acc, r) => {
+            acc += r.score;
+            return acc;
+          }, 0) / p.reviews.length
+        : -1,
+      revenue: p.cartProducts.reduce((acc, cp) => {
+        acc += cp.count * p.price;
+        return acc;
+      }, 0),
+      soldCount: p.cartProducts.reduce((acc, cp) => {
+        acc += cp.count;
+        return acc;
+      }, 0),
+    }));
+
+    return plainToInstance(AdminProductResponseDto, {
+      count: productIds.length || (await this.productRepository.count()),
+      products: processedProducts,
+    });
   }
 
   async update(

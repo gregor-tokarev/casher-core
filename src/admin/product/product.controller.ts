@@ -44,10 +44,10 @@ export class ProductController {
   @Get()
   async getProducts(
     @Query() query: AdminSearchProductsDto,
-  ): Promise<AdminProductResponseDto[]> {
+  ): Promise<AdminProductResponseDto> {
     const products = await this.productService.searchIds(query);
 
-    return this.adminProductService.generateAdminRes(products);
+    return this.adminProductService.generateAdminRes(products, query);
   }
 
   @HttpCode(HttpStatus.OK)

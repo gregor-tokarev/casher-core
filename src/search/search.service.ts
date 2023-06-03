@@ -40,19 +40,13 @@ export class SearchService {
     index: string,
     text: string,
     fields: string[],
-    top?: number,
-    skip?: number,
   ): Promise<ProductSearchItem[]> {
     const { hits } = await this.elasticsearchService.search<ProductSearchItem>({
       index: index,
-      body: {
-        size: top,
-        from: skip,
-        query: {
-          multi_match: {
-            query: text,
-            fields,
-          },
+      query: {
+        multi_match: {
+          query: text,
+          fields,
         },
       },
     });

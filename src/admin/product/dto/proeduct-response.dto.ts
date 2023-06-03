@@ -1,7 +1,12 @@
 import { Product } from '@core/entities/product.entity';
 
-export class AdminProductResponseDto extends Product {
+export class AdminProductsResponse extends Product {
   revenue: number;
   soldCount: number;
   overallRating: number;
+}
+
+export class AdminProductResponseDto {
+  products: AdminProductsResponse[];
+  count: number;
 }
