@@ -41,6 +41,16 @@ export class CategoryController {
   }
 
   @HttpCode(HttpStatus.OK)
+  @Get('/all-tree')
+  async allCategoriesTree(): Promise<Tree<Category>[]> {
+    const topCategories = await this.categoryService.topCategories();
+
+    return Promise.all(
+      topCategories.map((c) => this.categoryService.buildTree(c.id)),
+    );
+  }
+
+  @HttpCode(HttpStatus.OK)
   @Get('/:category_id')
   async getCategoryTree(
     @Param('category_id', ParseUUIDPipe) categoryId: string,
