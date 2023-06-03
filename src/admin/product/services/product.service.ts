@@ -64,9 +64,8 @@ export class AdminProductService {
       productsQuery = productsQuery.where('p.id in (:...ids)', {
         ids: productIds,
       });
-    } else {
-      productsQuery = productsQuery.skip(query.skip).take(query.top);
     }
+    productsQuery = productsQuery.skip(query.skip).take(query.top);
 
     const products = await productsQuery.getMany();
 
@@ -100,14 +99,13 @@ export class AdminProductService {
     query: SelectQueryBuilder<Product>,
     q: AdminSearchProductsDto,
   ) {
-    let newQuery = query;
-    if (q.categories) {
-      newQuery = newQuery.where('p.category in (:...ids)', {
+    if (q.categories && q.categories.length) {
+      query = query.where('p.category in (:...ids)', {
         ids: q.categories,
       });
     }
 
-    return newQuery;
+    return query;
   }
 
   async count(q: AdminSearchProductsDto): Promise<number> {
