@@ -90,7 +90,7 @@ export class AdminProductService {
     }));
 
     return plainToInstance(AdminProductResponseDto, {
-      count: productIds.length || (await this.count(query)),
+      count: await this.count(query, productIds),
       products: processedProducts,
     });
   }
@@ -108,9 +108,18 @@ export class AdminProductService {
     return query;
   }
 
-  async count(q: AdminSearchProductsDto): Promise<number> {
+  async count(
+    q: AdminSearchProductsDto,
+    productIds: string[],
+  ): Promise<number> {
     let query = this.productRepository.createQueryBuilder('p');
     query = this.addFiltersOnQuery(query, q);
+
+    if (productIds.length) {
+      query = query.where('p.id in (:...ids)', {
+        ids: productIds,
+      });
+    }
 
     return query.getCount();
   }
