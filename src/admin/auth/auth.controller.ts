@@ -8,11 +8,9 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseIntPipe,
   ParseUUIDPipe,
   Patch,
   Post,
-  Query,
   UseGuards,
 } from '@nestjs/common';
 import { AdminAuthService } from './services/auth.service';
@@ -88,11 +86,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard('jwt-admin-access'))
   @Get()
-  async getAllAdmins(
-    @Query('top', ParseIntPipe) top?: number,
-    @Query('skip', ParseIntPipe) skip?: number,
-  ): Promise<AllAdminsDto> {
-    const admins = await this.adminManageService.findAll(top, skip);
+  async getAllAdmins(): Promise<AllAdminsDto> {
+    const admins = await this.adminManageService.findAll();
     const count = await this.adminManageService.count();
 
     return { admins: admins.map((adm) => adm.publicView()), count };

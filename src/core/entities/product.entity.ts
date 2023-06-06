@@ -72,7 +72,9 @@ export class Product extends BaseEntity {
   priceCurrency: 'ruble' | 'dollar';
 
   @JoinColumn()
-  @ManyToOne(() => Category, (category) => category.id)
+  @ManyToOne(() => Category, (category) => category.id, {
+    onDelete: 'SET NULL',
+  })
   category: Category;
 
   @Column({
