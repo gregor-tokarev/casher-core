@@ -41,7 +41,21 @@ export class AdminCategoryService {
     categoryId: string,
     updateCategoryDto: UpdateCategoryDto,
   ): Promise<Category> {
-    await this.categoryRepository.update({ id: categoryId }, updateCategoryDto);
+    if (updateCategoryDto.parentId) {
+      const parentCategory = await this.categoryService.findOneOrFail({
+        id: updateCategoryDto.parentId,
+      });
+
+      await this.categoryRepository.update(
+        { id: categoryId },
+        { ...updateCategoryDto, level: parentCategory.level + 1 },
+      );
+    } else {
+      await this.categoryRepository.update(
+        { id: categoryId },
+        updateCategoryDto,
+      );
+    }
 
     return this.categoryService.findOneOrFail({ id: categoryId });
   }
