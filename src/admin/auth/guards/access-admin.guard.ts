@@ -9,8 +9,10 @@ export class AccessAdminGuard implements CanActivate {
     const { user } = context.switchToHttp().getRequest();
     const { admin_id: adminId } = context.switchToHttp().getRequest().params;
 
-    const remover = await this.adminManageService.findByOrFail(user.sub);
-    const removed = await this.adminManageService.findByOrFail(adminId);
+    const remover = await this.adminManageService.findByOrFail({
+      id: user.sub,
+    });
+    const removed = await this.adminManageService.findByOrFail({ id: adminId });
 
     return remover.addedBy === null || removed.addedBy === remover.id;
   }
