@@ -13,7 +13,7 @@ import { OauthOption } from '@core/entities/oauth-option.entity';
 import { AdminUserService } from './services/user.service';
 import { OkDto } from '@core/dto/ok.dto';
 import { EnableOauthDto } from './dto/enable-oauth.dto';
-import { UserResponseDto } from './dto/users-response.dto';
+import { UsersResponseDto } from './dto/users-response.dto';
 import { UsersRequestDto } from './dto/users-request.dto';
 
 @UseGuards(AuthGuard('jwt-admin-access'))
@@ -23,9 +23,11 @@ export class AdminUsersController {
 
   @Get()
   getAllUsers(
-    @Query() usersRequestDto: UsersRequestDto,
-  ): Promise<UserResponseDto[]> {
-    return this.userService.getAllUsers(usersRequestDto);
+    @Query() usersRequestDto: Record<string, string>,
+  ): Promise<UsersResponseDto> {
+    return this.userService.getAllUsers(
+      usersRequestDto as unknown as UsersRequestDto,
+    );
   }
 
   @Get('/oauth')

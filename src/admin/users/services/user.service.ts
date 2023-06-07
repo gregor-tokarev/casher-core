@@ -6,7 +6,7 @@ import {
 import { OauthOption } from '@core/entities/oauth-option.entity';
 import { EnableOauthDto } from '../dto/enable-oauth.dto';
 import { OauthOptionService } from '@core/services/oauth-option.service';
-import { UserResponseDto } from '../dto/users-response.dto';
+import { UserResponseDto, UsersResponseDto } from '../dto/users-response.dto';
 import { UsersRequestDto } from '../dto/users-request.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '@core/entities/user.entity';
@@ -97,19 +97,25 @@ export class AdminUserService {
 
   async getAllUsers(
     usersRequestDto: UsersRequestDto,
-  ): Promise<UserResponseDto[]> {
+  ): Promise<UsersResponseDto> {
     const users = await this.userRepository.find({
       skip: usersRequestDto.skip,
       take: usersRequestDto.limit,
-      relations: ['order'],
+      relations: ['order', 'oauth'],
     });
 
-    return users.map((u) =>
-      plainToInstance(UserResponseDto, {
-        ...u,
-        totalOrder: u.order.calculatePrice(),
-        order: undefined,
-      }),
-    );
+    return plainToInstance(UsersResponseDto, {
+      users: users.map((u) =>
+        plainToInstance(UserResponseDto, {
+          ...u,
+          totalOrder: u.order.reduce((acc, o) => {
+            acc += o.calculatePrice();
+            return acc;
+          }, 0),
+          order: undefined,
+        }),
+      ),
+      count: await this.userRepository.count(),
+    });
   }
 }

@@ -51,7 +51,7 @@ export class User extends BaseEntity {
   oauth?: UserOauth;
 
   @OneToMany(() => Order, (order) => order.owner)
-  order: Order;
+  order: Order[];
 
   @BeforeInsert()
   async beforeInsert() {
