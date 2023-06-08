@@ -18,8 +18,7 @@ import { AuthGuard } from '@nestjs/passport';
 @UseGuards(AuthGuard('jwt-admin-access'))
 @Controller('admin/order')
 export class OrderController {
-  constructor(private read
-  only adminOrderService: AdminOrderService) {}
+  constructor(private readonly adminOrderService: AdminOrderService) {}
 
   @HttpCode(HttpStatus.OK)
   @Patch('/:order_id/change_status')
