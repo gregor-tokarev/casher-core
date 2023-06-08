@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ChangeStatusDto } from '../dto/change-status.dto';
 import { Order } from '@core/entities/order.entity';
 import { OrderService } from '@core/services/order.service';
-import { GetOrdersDto } from '../dto/get-orders.dto';
+import { GetOrdersDto, OrdersResponseDto } from '../dto/get-orders.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -24,7 +24,13 @@ export class AdminOrderService {
     return order.save();
   }
 
-  async getOrders(params: GetOrdersDto): Promise<Order[]> {
-    return this.orderRepository.find({ skip: params.skip, take: params.take });
+  async getOrders(params: GetOrdersDto): Promise<OrdersResponseDto> {
+    return {
+      count: await this.orderRepository.count(),
+      orders: await this.orderRepository.find({
+        skip: params.skip,
+        take: params.take,
+      }),
+    };
   }
 }

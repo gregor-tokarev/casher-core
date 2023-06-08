@@ -12,14 +12,14 @@ import {
 } from '@nestjs/common';
 import { AdminOrderService } from './services/order.service';
 import { ChangeStatusDto } from './dto/change-status.dto';
-import { GetOrdersDto } from './dto/get-orders.dto';
-import { Order } from '@core/entities/order.entity';
+import { GetOrdersDto, OrdersResponseDto } from './dto/get-orders.dto';
 import { AuthGuard } from '@nestjs/passport';
 
 @UseGuards(AuthGuard('jwt-admin-access'))
 @Controller('admin/order')
 export class OrderController {
-  constructor(private readonly adminOrderService: AdminOrderService) {}
+  constructor(private read
+  only adminOrderService: AdminOrderService) {}
 
   @HttpCode(HttpStatus.OK)
   @Patch('/:order_id/change_status')
@@ -32,7 +32,7 @@ export class OrderController {
 
   @HttpCode(HttpStatus.OK)
   @Get()
-  async getAllOrders(@Query() q: GetOrdersDto): Promise<Order[]> {
+  async getAllOrders(@Query() q: GetOrdersDto): Promise<OrdersResponseDto> {
     return this.adminOrderService.getOrders(q);
   }
 }
