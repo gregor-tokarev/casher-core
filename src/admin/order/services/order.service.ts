@@ -30,6 +30,7 @@ export class AdminOrderService {
       orders: await this.orderRepository.find({
         skip: params.skip,
         take: params.take,
+        relations: ['owner', 'products'],
       }),
     };
   }

@@ -1,12 +1,13 @@
-import { IsNumber, IsOptional } from 'class-validator';
+import { IsOptional } from 'class-validator';
 import { Order } from '@core/entities/order.entity';
+import { Transform } from 'class-transformer';
 
 export class GetOrdersDto {
-  @IsNumber()
+  @Transform((v) => parseInt(v.value))
   @IsOptional()
   skip = 0;
 
-  @IsNumber()
+  @Transform((v) => parseInt(v.value))
   @IsOptional()
   take = 20;
 }
