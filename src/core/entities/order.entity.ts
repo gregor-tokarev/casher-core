@@ -44,9 +44,11 @@ export class Order extends BaseEntity {
   owner: User;
 
   calculatePrice(): number {
-    return this.products.reduce((acc, cp) => {
-      acc += cp.count * cp.product.price;
-      return acc;
-    }, 0);
+    return this.products
+      ? this.products.reduce((acc, cp) => {
+          acc += cp.count * cp.product.price;
+          return acc;
+        }, 0)
+      : 0;
   }
 }
