@@ -11,7 +11,7 @@ import {
 import { ReviewService } from '@core/services/review.service';
 import { Review } from '@core/entities/review.entity';
 import { AuthGuard } from '@nestjs/passport';
-import { OkDto } from '@core/dto/ok.dto';
+import { MessageDto } from '@core/dto/message.dto';
 
 @UseGuards(AuthGuard('jwt-admin-access'))
 @Controller('admin/product')
@@ -33,7 +33,7 @@ export class ReviewController {
   @Delete('/review/:review_id')
   async deleteReview(
     @Param('review_id', ParseUUIDPipe) reviewId: string,
-  ): Promise<OkDto> {
+  ): Promise<MessageDto> {
     await this.reviewService.delete(reviewId);
 
     return { message: 'ok' };

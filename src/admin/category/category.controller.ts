@@ -18,7 +18,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Tree } from '../../types/tree.type';
-import { OkDto } from '@core/dto/ok.dto';
+import { MessageDto } from '@core/dto/message.dto';
 
 @UseGuards(AuthGuard('jwt-admin-access'))
 @Controller('admin/category')
@@ -84,7 +84,7 @@ export class CategoryController {
   @Delete('/:category_id')
   async deleteCategory(
     @Param('category_id', ParseUUIDPipe) categoryId: string,
-  ): Promise<OkDto> {
+  ): Promise<MessageDto> {
     await this.adminCategoryService.deleteCategory(categoryId);
 
     return { message: 'ok' };

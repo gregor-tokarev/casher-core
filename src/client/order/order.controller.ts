@@ -23,7 +23,7 @@ import { ConfigService } from '@nestjs/config';
 import { EnvironmentVars } from '@config/environment-vars';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { Payment } from '@a2seven/yoo-checkout';
-import { OkDto } from '@core/dto/ok.dto';
+import { MessageDto } from '@core/dto/message.dto';
 import { OrderService } from '@core/services/order.service';
 
 @Controller('client/order')
@@ -89,7 +89,7 @@ export class OrderController {
   @Post('/yookassa-webhook')
   async yookassaWebhook(
     @Body() body: { event: string; type: string; object: Payment },
-  ): Promise<OkDto> {
+  ): Promise<MessageDto> {
     if (body.event === 'payment.waiting_for_capture') {
       await this.yookassaService.capturePayment(body.object.id);
       const order = await this.orderService.orderByPayment(body.object.id);

@@ -6,6 +6,7 @@ import { EnvironmentVars } from '@config/environment-vars';
 import { AdminTokensDto } from '../dto/tokens.dto';
 import { LoginAdminDto } from '../dto/login-admin.dto';
 import { AdminAuthManageService } from './manage.service';
+import { MessageDto } from '@core/dto/message.dto';
 
 @Injectable()
 export class AdminAuthService {
@@ -26,10 +27,16 @@ export class AdminAuthService {
     return tokens;
   }
 
-  async login(loginAdminDto: LoginAdminDto): Promise<AdminTokensDto> {
+  async login(
+    loginAdminDto: LoginAdminDto,
+  ): Promise<AdminTokensDto | MessageDto> {
     const adminUser = await this.adminManageService.findByOrFail({
       email: loginAdminDto.email,
     });
+
+    if (!adminUser.password) {
+      return { message: 'set password' };
+    }
 
     const isRightPass = adminUser.validatePassword(loginAdminDto.password);
     if (!isRightPass) {

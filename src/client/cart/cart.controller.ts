@@ -15,7 +15,7 @@ import { Cart } from './entities/cart.entity';
 import { ClientCartService } from './services/cart.service';
 import { GetClientUser } from '../auth/decorators/get-user.decorator';
 import { ManageProductsDto } from './dto/manage-products.dto';
-import { OkDto } from '@core/dto/ok.dto';
+import { MessageDto } from '@core/dto/message.dto';
 import { SetCountDto } from './dto/set-count.dto';
 import { CountDto } from './dto/count.dto';
 
@@ -35,7 +35,7 @@ export class CartController {
   async addProducts(
     @GetClientUser('sub') userId: string,
     @Body() manageProductsDto: ManageProductsDto,
-  ): Promise<OkDto> {
+  ): Promise<MessageDto> {
     const cart = await this.clientCartService.findOneOrFail({
       owner: { id: userId },
     });
@@ -50,7 +50,7 @@ export class CartController {
   async removeProducts(
     @GetClientUser('sub') userId: string,
     @Body() manageProductsDto: ManageProductsDto,
-  ): Promise<OkDto> {
+  ): Promise<MessageDto> {
     const cart = await this.clientCartService.findOneOrFail({
       owner: { id: userId },
     });

@@ -11,6 +11,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { AdminAuthService } from './services/auth.service';
@@ -22,7 +23,7 @@ import { LoginAdminDto } from './dto/login-admin.dto';
 import { AdminPermissions, AdminUser } from '../entities/admin-user.entity';
 import { Permissions } from './decorators/set-permission.decorator';
 import { CreateAdminDto } from './dto/create-admin.dto';
-import { OkDto } from '@core/dto/ok.dto';
+import { MessageDto } from '@core/dto/message.dto';
 import { SetPasswordDto } from './dto/set-password.dto';
 import { AccessAdminGuard } from './guards/access-admin.guard';
 import { ChangePermissionsDto } from './dto/change-permissions.dto';
@@ -51,7 +52,7 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Get('/has-any-admin')
-  async hasAnyAdmin(): Promise<OkDto> {
+  async hasAnyAdmin(): Promise<MessageDto> {
     const admins = await this.adminManageService.findAll();
 
     return {
@@ -71,14 +72,16 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('/login')
-  async login(@Body() body: LoginAdminDto): Promise<AdminTokensDto> {
+  async login(
+    @Body() body: LoginAdminDto,
+  ): Promise<AdminTokensDto | MessageDto> {
     return this.adminAuthService.login(body);
   }
 
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard('jwt-admin-access'))
   @Post('/logout')
-  async logout(@GetAdminUser('sub') adminId: string): Promise<OkDto> {
+  async logout(@GetAdminUser('sub') adminId: string): Promise<MessageDto> {
     await this.adminManageService.clearRefreshToken(adminId);
     return { message: 'ok' };
   }
@@ -131,19 +134,19 @@ export class AuthController {
   @Delete('/remove_admin/:admin_id')
   async removeAdmin(
     @Param('admin_id', ParseUUIDPipe) removedAdminId: string,
-  ): Promise<OkDto> {
+  ): Promise<MessageDto> {
     await this.adminManageService.delete(removedAdminId);
 
     return { message: 'ok' };
   }
 
   @HttpCode(HttpStatus.OK)
-  @Patch('/:admin_id/set_password')
+  @Patch('/set_password')
   async setPassword(
-    @Param('admin_id', ParseUUIDPipe) adminId: string,
+    @Query('email') adminEmail: string,
     @Body() setPasswordDto: SetPasswordDto,
-  ): Promise<OkDto> {
-    await this.adminManageService.setPassword(adminId, setPasswordDto);
+  ): Promise<MessageDto> {
+    await this.adminManageService.setPassword(adminEmail, setPasswordDto);
 
     return { message: 'ok' };
   }
@@ -155,7 +158,7 @@ export class AuthController {
   async changePermissions(
     @Param('admin_id', ParseUUIDPipe) adminId: string,
     @Body() changePermissionsDto: ChangePermissionsDto,
-  ): Promise<OkDto> {
+  ): Promise<MessageDto> {
     await this.adminManageService.changePermissions(
       adminId,
       changePermissionsDto,

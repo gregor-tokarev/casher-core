@@ -64,10 +64,12 @@ export class AdminAuthManageService {
   }
 
   async setPassword(
-    id: string,
+    email: string,
     setPasswordDto: SetPasswordDto,
   ): Promise<AdminUser> {
-    const admin = await this.adminUserRepository.findOneByOrFail({ id });
+    const admin = await this.adminUserRepository.findOneByOrFail({
+      email,
+    });
     if (admin.password) {
       throw new ForbiddenException('Password already set');
     }

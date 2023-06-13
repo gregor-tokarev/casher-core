@@ -10,7 +10,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { OauthOption } from '@core/entities/oauth-option.entity';
 import { EnableOauthDto } from '../users/dto/enable-oauth.dto';
-import { OkDto } from '@core/dto/ok.dto';
+import { MessageDto } from '@core/dto/message.dto';
 import { AdminPaymentOptionService } from './services/payment-option.service';
 import { PaymentOptionService } from '@core/services/payment-option.service';
 
@@ -31,7 +31,7 @@ export class PaymentOauthController {
   async enableOption(
     @Param('option_id', ParseUUIDPipe) optionId: string,
     @Body() enableDto: EnableOauthDto,
-  ): Promise<OkDto> {
+  ): Promise<MessageDto> {
     await this.adminPaymentOptionService.checkCredentials(
       optionId,
       JSON.parse(enableDto.credentials),
@@ -45,7 +45,7 @@ export class PaymentOauthController {
   @Post('/option/:option_id/disable')
   async disableOption(
     @Param('option_id', ParseUUIDPipe) optionId: string,
-  ): Promise<OkDto> {
+  ): Promise<MessageDto> {
     await this.adminPaymentOptionService.disableOption(optionId);
 
     return { message: 'ok' };

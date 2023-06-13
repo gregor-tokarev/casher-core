@@ -11,7 +11,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { OauthOption } from '@core/entities/oauth-option.entity';
 import { AdminUserService } from './services/user.service';
-import { OkDto } from '@core/dto/ok.dto';
+import { MessageDto } from '@core/dto/message.dto';
 import { EnableOauthDto } from './dto/enable-oauth.dto';
 import { UsersResponseDto } from './dto/users-response.dto';
 import { UsersRequestDto } from './dto/users-request.dto';
@@ -39,7 +39,7 @@ export class AdminUsersController {
   async enableOption(
     @Param('oauth_id', ParseUUIDPipe) oauthId: string,
     @Body() enableDto: EnableOauthDto,
-  ): Promise<OkDto> {
+  ): Promise<MessageDto> {
     await this.userService.checkCredentials(
       oauthId,
       JSON.parse(enableDto.credentials),
@@ -53,7 +53,7 @@ export class AdminUsersController {
   @Post('/oauth/:oauth_id/disable')
   async disableOption(
     @Param('oauth_id', ParseUUIDPipe) oauthId: string,
-  ): Promise<OkDto> {
+  ): Promise<MessageDto> {
     await this.userService.disableOauthOption(oauthId);
 
     return { message: 'ok' };

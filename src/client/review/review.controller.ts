@@ -23,7 +23,7 @@ import { GetClientUser } from '../auth/decorators/get-user.decorator';
 import { ClientReviewService } from './review.service';
 import { AccessReviewGuard } from './guards/access-review.guard';
 import { UpdateReviewDto } from './dto/update-review.dto';
-import { OkDto } from '@core/dto/ok.dto';
+import { MessageDto } from '@core/dto/message.dto';
 import { DeletePhotosDto } from './dto/delete-photos.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { fileMimetypeFilter } from '../../file/utils/file-mimetype-filter';
@@ -119,7 +119,7 @@ export class ReviewController {
   @Delete('/review/:review_id')
   async deleteReview(
     @Param('review_id', ParseUUIDPipe) reviewId: string,
-  ): Promise<OkDto> {
+  ): Promise<MessageDto> {
     await this.reviewService.delete(reviewId);
 
     return { message: 'ok' };
