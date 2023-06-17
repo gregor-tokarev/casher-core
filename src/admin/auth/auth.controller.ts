@@ -29,6 +29,7 @@ import { AccessAdminGuard } from './guards/access-admin.guard';
 import { ChangePermissionsDto } from './dto/change-permissions.dto';
 import { AdminAuthManageService } from './services/manage.service';
 import { AllAdminsDto } from './dto/all-admins.dto';
+import { CheckEmailDto } from './dto/check-email.dto';
 
 @Controller('admin/auth')
 export class AuthController {
@@ -36,6 +37,20 @@ export class AuthController {
     private readonly adminAuthService: AdminAuthService,
     private readonly adminManageService: AdminAuthManageService,
   ) {}
+
+  @HttpCode(HttpStatus.OK)
+  @Post('/check_email')
+  async checkEmail(@Body() checkEmailDto: CheckEmailDto): Promise<MessageDto> {
+    const adminUser = await this.adminManageService.findByOrFail({
+      email: checkEmailDto.email,
+    });
+
+    if (!adminUser.password) {
+      return { message: 'set_password' };
+    }
+
+    return { message: 'ok' };
+  }
 
   @HttpCode(HttpStatus.CREATED)
   @Post('/add_first')
